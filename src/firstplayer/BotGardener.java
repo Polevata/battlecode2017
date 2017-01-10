@@ -2,6 +2,6 @@ package firstplayer;
 
 import battlecode.common.*;
 
-public strictfp class BotGardener {
+public strictfp class BotGardener extends Bot {
 
 }
