@@ -87,7 +87,7 @@ public strictfp class Bot {
     return false;
   }
 
-  public static boolean willCollideWithMe(RobotController rc, BulletInfo bullet) {
+  public static boolean willCollideWithMe(BulletInfo bullet) {
     MapLocation myLocation = rc.getLocation();
 
     // Get relevant bullet information
@@ -114,20 +114,21 @@ public strictfp class Bot {
   }
 
   static boolean evade() throws GameActionException {
-    ArrayList<BulletInfo> dangerousBullets = new ArrayList<>(0);
-    for (BulletInfo i : rc.senseNearbyBullets())
-    {
-      if (willCollideWithMe(rc,i))
-        dangerousBullets.add(i);
-    }
-    if(dangerousBullets.isEmpty())
-      return false;
+    BulletInfo[] nearbyBullets = rc.senseNearbyBullets();
     float netX = 0;
     float netY = 0;
-    for (BulletInfo b : dangerousBullets)
-    {
-      netX += b.dir.getDeltaX(1)/b.getLocation().distanceTo(here);
-      netY += b.dir.getDeltaY(1)/b.getLocation().distanceTo(here);
+    BulletInfo b;
+    boolean noDangerousBullet = true;
+    for (int i = 0; i < nearbyBullets.length; i++) {
+      b = nearbyBullets[i];
+      if (willCollideWithMe(b)) {
+        noDangerousBullet = false;
+        netX += b.dir.getDeltaX(1) / b.getLocation().distanceTo(here);
+        netY += b.dir.getDeltaY(1) / b.getLocation().distanceTo(here);
+      }
+    }
+    if (noDangerousBullet) {
+      return false;
     }
     Direction averageDirection = new Direction(netX,netY);
     return tryMove(averageDirection.rotateLeftDegrees(90)) || tryMove(averageDirection.rotateRightDegrees(90));
