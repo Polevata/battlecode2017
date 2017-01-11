@@ -3,7 +3,6 @@ package firstplayer;
 import battlecode.common.*;
 
 public strictfp class BotGardener extends Bot {
-
   public static void loop(RobotController rc_) {
     System.out.println("I'm a bot!");
     Bot.init(rc_);
@@ -45,5 +44,4 @@ public strictfp class BotGardener extends Bot {
     // Move randomly
     tryMove(randomDirection());
   }
-
 }

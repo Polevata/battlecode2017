@@ -1,9 +1,9 @@
 package firstplayer;
 
 import battlecode.common.*;
+import battlecodeutils.Utils;
 
 public strictfp class BotArchon extends Bot {
-
   public static void loop(RobotController rc_) {
     System.out.println("I'm a bot!");
     Bot.init(rc_);
@@ -44,5 +44,4 @@ public strictfp class BotArchon extends Bot {
 
   public static void trySpawn() throws GameActionException {
   }
-
 }

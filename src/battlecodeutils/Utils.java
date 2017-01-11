@@ -3,6 +3,8 @@ package battlecodeutils;
 import battlecode.common.*;
 import java.util.Random;
 
+import java.util.Random;
+
 public strictfp class Utils {
 
   /**
@@ -49,5 +51,9 @@ public strictfp class Utils {
     float perpendicularDist = (float)Math.abs(distToRobot * Math.sin(theta)); // soh cah toa :)
 
     return (perpendicularDist <= rc.getType().bodyRadius);
+  }
+  public static Direction getRandomDirection()
+  {
+    return new Direction((float)(2*Math.random()*Math.PI));
   }
 }

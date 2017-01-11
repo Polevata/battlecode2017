@@ -6,6 +6,7 @@ public strictfp class RobotPlayer {
 
   @SuppressWarnings("unused")
   public static void run(RobotController rc_) throws Exception {
+    System.out.println(rc_.getRoundNum());
     switch (rc_.getType()) {
       case ARCHON:
         BotArchon.loop(rc_);

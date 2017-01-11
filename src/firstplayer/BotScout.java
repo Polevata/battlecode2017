@@ -3,7 +3,6 @@ package firstplayer;
 import battlecode.common.*;
 
 public strictfp class BotScout extends Bot {
-
   public static void loop(RobotController rc_) {
     System.out.println("I'm a bot!");
     Bot.init(rc_);
@@ -58,5 +57,4 @@ public strictfp class BotScout extends Bot {
       }
     }
   }
-
 }

@@ -30,7 +30,6 @@ public strictfp class Bot {
     here = rc.getLocation();
     roundNum = rc.getRoundNum();
   }
-  
   public static Direction randomDirection() {
     return new Direction(random.nextFloat() * 2 * (float) Math.PI);
   }
@@ -85,5 +84,4 @@ public strictfp class Bot {
     // A move never happened, so return false.
     return false;
   }
-
 }
