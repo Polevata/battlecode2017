@@ -1,11 +1,11 @@
 package firstplayer;
 
 import battlecode.common.*;
-import battlecodeutils.Utils;
+import bcutils.*;
 
 public strictfp class BotArchon extends Bot {
   public static void loop(RobotController rc_) {
-    System.out.println("I'm a bot!");
+    System.out.println("I'm an Archon!");
     Bot.init(rc_);
     int endTurnRoundNum;
     while (true) {
@@ -26,15 +26,15 @@ public strictfp class BotArchon extends Bot {
 
   public static void doTurn() throws GameActionException {
     // Generate a random direction
-    Direction dir = randomDirection();
+    Direction dir = Utils.randomDirection();
 
     // Randomly attempt to build a gardener in this direction
     if (rc.canHireGardener(dir) && Math.random() < .01) {
       rc.hireGardener(dir);
     }
 
-    // Move randomly
-    tryMove(randomDirection());
+    // Evade bullets but don't move otherwise (too likely to get entrapped in enemy team)
+    evade();
 
     // Broadcast archon's location for other robots on the team to know
     MapLocation myLocation = rc.getLocation();

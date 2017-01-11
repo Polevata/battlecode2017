@@ -1,8 +1,6 @@
-package battlecodeutils;
+package bcutils;
 
 import battlecode.common.*;
-import java.util.Random;
-
 import java.util.Random;
 
 public strictfp class Utils {

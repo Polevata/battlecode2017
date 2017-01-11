@@ -4,7 +4,7 @@ import battlecode.common.*;
 
 public strictfp class BotGardener extends Bot {
   public static void loop(RobotController rc_) {
-    System.out.println("I'm a bot!");
+    System.out.println("I'm a Gardener!");
     Bot.init(rc_);
     int endTurnRoundNum;
     while (true) {
@@ -39,9 +39,12 @@ public strictfp class BotGardener extends Bot {
 //      rc.buildRobot(RobotType.LUMBERJACK, dir);
     } else if (rc.canBuildRobot(RobotType.SCOUT, dir) && Math.random() < .01) {
       rc.buildRobot(RobotType.SCOUT, dir);
+    } else if (rc.canBuildRobot(RobotType.LUMBERJACK, dir) && Math.random() < .01) {
+      rc.buildRobot(RobotType.LUMBERJACK, dir);
     }
 
     // Move randomly
-    tryMove(randomDirection());
+    if (!evade())
+      tryMove(randomDirection());
   }
 }

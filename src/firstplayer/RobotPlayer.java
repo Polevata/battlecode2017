@@ -19,6 +19,8 @@ public strictfp class RobotPlayer {
         break;
       case SOLDIER:
         BotSoldier.loop(rc_);
+      case LUMBERJACK:
+        BotLumber.loop(rc_);
       default:
         System.out.println("I don't know what this type of bot is");
     }

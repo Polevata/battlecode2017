@@ -1,6 +1,8 @@
 package firstplayer;
 
 import battlecode.common.*;
+
+import java.util.ArrayList;
 import java.util.Random;
 
 public strictfp class Bot {
@@ -57,7 +59,7 @@ public strictfp class Bot {
   static boolean tryMove(Direction dir, float degreeOffset, int checksPerSide) throws GameActionException {
 
     // First, try intended direction
-    if (rc.canMove(dir)) {
+    if (rc.canMove(dir) && !rc.hasMoved()) {
       rc.move(dir);
       return true;
     }
@@ -83,5 +85,51 @@ public strictfp class Bot {
 
     // A move never happened, so return false.
     return false;
+  }
+
+  public static boolean willCollideWithMe(RobotController rc, BulletInfo bullet) {
+    MapLocation myLocation = rc.getLocation();
+
+    // Get relevant bullet information
+    Direction propagationDirection = bullet.dir;
+    MapLocation bulletLocation = bullet.location;
+
+    // Calculate bullet relations to this robot
+    Direction directionToRobot = bulletLocation.directionTo(myLocation);
+    float distToRobot = bulletLocation.distanceTo(myLocation);
+    float theta = propagationDirection.radiansBetween(directionToRobot);
+
+    // If theta > 90 degrees, then the bullet is traveling away from us and we can break early
+    if (Math.abs(theta) > Math.PI/2) {
+      return false;
+    }
+
+    // distToRobot is our hypotenuse, theta is our angle, and we want to know this length of the opposite leg.
+    // This is the distance of a line that goes from myLocation and intersects perpendicularly with propagationDirection.
+    // This corresponds to the smallest radius circle centered at our location that would intersect with the
+    // line that is the path of the bullet.
+    float perpendicularDist = (float)Math.abs(distToRobot * Math.sin(theta)); // soh cah toa :)
+
+    return (perpendicularDist <= rc.getType().bodyRadius);
+  }
+
+  static boolean evade() throws GameActionException {
+    ArrayList<BulletInfo> dangerousBullets = new ArrayList<>(0);
+    for (BulletInfo i : rc.senseNearbyBullets())
+    {
+      if (willCollideWithMe(rc,i))
+        dangerousBullets.add(i);
+    }
+    if(dangerousBullets.isEmpty())
+      return false;
+    float netX = 0;
+    float netY = 0;
+    for (BulletInfo b : dangerousBullets)
+    {
+      netX += b.dir.getDeltaX(1)/b.getLocation().distanceTo(here);
+      netY += b.dir.getDeltaY(1)/b.getLocation().distanceTo(here);
+    }
+    Direction averageDirection = new Direction(netX,netY);
+    return tryMove(averageDirection.rotateLeftDegrees(90)) || tryMove(averageDirection.rotateRightDegrees(90));
   }
 }

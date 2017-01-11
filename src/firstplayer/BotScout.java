@@ -4,7 +4,7 @@ import battlecode.common.*;
 
 public strictfp class BotScout extends Bot {
   public static void loop(RobotController rc_) {
-    System.out.println("I'm a bot!");
+    System.out.println("I'm a Scout!");
     Bot.init(rc_);
     int endTurnRoundNum;
     while (true) {
@@ -42,19 +42,20 @@ public strictfp class BotScout extends Bot {
   }
 
   static void explore() throws GameActionException {
-    tryMove(randomDirection());
+      if (!evade())
+          tryMove(randomDirection());
   }
 
-  static void harass() throws GameActionException {
-    RobotInfo[] robots = rc.senseNearbyRobots(-1, them);
+    static void harass() throws GameActionException {
+        RobotInfo[] robots = rc.senseNearbyRobots(-1, them);
 
-    // If there are some...
-    if (robots.length > 0) {
-      // And we have enough bullets, and haven't attacked yet this turn...
-      if (rc.canFireSingleShot()) {
-        // ...Then fire a bullet in the direction of the enemy.
-        rc.fireSingleShot(rc.getLocation().directionTo(robots[0].location));
-      }
+        // If there are some...
+        if (robots.length > 0) {
+            // And we have enough bullets, and haven't attacked yet this turn...
+            if (rc.canFireSingleShot()) {
+                // ...Then fire a bullet in the direction of the enemy.
+                rc.fireSingleShot(rc.getLocation().directionTo(robots[0].location));
+            }
+        }
     }
-  }
 }
