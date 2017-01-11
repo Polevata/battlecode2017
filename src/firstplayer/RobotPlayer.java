@@ -16,8 +16,10 @@ public strictfp class RobotPlayer {
       case SCOUT:
         BotScout.loop(rc_);
         break;
+      case SOLDIER:
+        BotSoldier.loop(rc_);
       default:
-        throw new Exception("Unknown robot type");
+        System.out.println("I don't know what this type of bot is");
     }
   }
 }

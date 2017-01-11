@@ -2,7 +2,7 @@ package firstplayer;
 
 import battlecode.common.*;
 
-public strictfp class BotArchon extends Bot {
+public strictfp class BotSoldier extends Bot {
 
   public static void loop(RobotController rc_) {
     System.out.println("I'm a bot!");
@@ -23,26 +23,22 @@ public strictfp class BotArchon extends Bot {
       Clock.yield();
     }
   }
-
+  
   public static void doTurn() throws GameActionException {
-    // Generate a random direction
-    Direction dir = randomDirection();
+    // See if there are any nearby enemy robots
+    RobotInfo[] robots = rc.senseNearbyRobots(-1, them);
 
-    // Randomly attempt to build a gardener in this direction
-    if (rc.canHireGardener(dir) && Math.random() < .01) {
-      rc.hireGardener(dir);
+    // If there are some...
+    if (robots.length > 0) {
+      // And we have enough bullets, and haven't attacked yet this turn...
+      if (rc.canFireSingleShot()) {
+        // ...Then fire a bullet in the direction of the enemy.
+        rc.fireSingleShot(rc.getLocation().directionTo(robots[0].location));
+      }
     }
 
     // Move randomly
     tryMove(randomDirection());
-
-    // Broadcast archon's location for other robots on the team to know
-    MapLocation myLocation = rc.getLocation();
-    rc.broadcast(0, (int) myLocation.x);
-    rc.broadcast(1, (int) myLocation.y);
-  }
-
-  public static void trySpawn() throws GameActionException {
   }
 
 }
