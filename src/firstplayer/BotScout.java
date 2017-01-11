@@ -27,7 +27,7 @@ public strictfp class BotScout extends Bot {
   public static void doTurn() throws GameActionException {
     explore();
     tryShake();
-    harrass();
+    harass();
   }
   
   public static void tryShake() throws GameActionException {
@@ -46,7 +46,7 @@ public strictfp class BotScout extends Bot {
     tryMove(randomDirection());
   }
 
-  static void harrass() throws GameActionException {
+  static void harass() throws GameActionException {
     RobotInfo[] robots = rc.senseNearbyRobots(-1, them);
 
     // If there are some...
