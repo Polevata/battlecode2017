@@ -1,8 +1,23 @@
 package battlecodeutils;
 
 import battlecode.common.*;
+import java.util.Random;
 
 public strictfp class Utils {
+
+  /**
+   * Returns a random Direction
+   *
+   * @return a random Direction
+   */
+  public static Direction randomDirection() {
+    return new Direction((float) Math.random() * 2 * (float) Math.PI);
+  }
+  
+  public static Direction randomDirection(Random random) {
+    return new Direction(random.nextFloat() * 2 * (float) Math.PI);
+  }
+
   /**
    * A slightly more complicated example function, this returns true if the given bullet is on a collision
    * course with the current robot. Doesn't take into account objects between the bullet and this robot.
