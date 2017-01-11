@@ -29,8 +29,8 @@ public strictfp class BotArchon extends Bot {
     Direction dir = Utils.randomDirection();
 
     // Randomly attempt to build a gardener in this direction
-    if (rc.canHireGardener(dir) && Math.random() < .01) {
-      rc.hireGardener(dir);
+    if (rc.canHireGardener(dir) && ((plant && rc.getRobotCount()>rc.getTreeCount()) || Math.random()<0.01)){
+        rc.hireGardener(dir);
     }
 
     // Evade bullets but don't move otherwise (too likely to get entrapped in enemy team)

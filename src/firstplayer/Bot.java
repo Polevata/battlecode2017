@@ -15,6 +15,8 @@ public strictfp class Bot {
   
   public static MapLocation here;
   public static int roundNum;
+
+  public static boolean plant = true;
   
   public static void init(RobotController rc_) {
     rc = rc_;

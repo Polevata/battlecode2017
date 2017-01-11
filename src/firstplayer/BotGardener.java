@@ -32,19 +32,46 @@ public strictfp class BotGardener extends Bot {
     // Generate a random direction
     Direction dir = randomDirection();
 
+    TreeInfo[] adjacentTrees = rc.senseNearbyTrees(2, us);
+
+    if(adjacentTrees.length>0) rc.water(weakestAdjacentTree(adjacentTrees));
+
+    if(plant && rc.getTreeCount()<rc.getRobotCount() && rc.canPlantTree(dir)){
+      rc.plantTree(dir);
+    }
+
     // Randomly attempt to build a soldier or lumberjack in this direction
-    if (rc.canBuildRobot(RobotType.SOLDIER, dir) && Math.random() < .01) {
+    else if (rc.canBuildRobot(RobotType.SOLDIER, dir) && Math.random() < .2) {
       rc.buildRobot(RobotType.SOLDIER, dir);
 //    } else if (rc.canBuildRobot(RobotType.LUMBERJACK, dir) && Math.random() < .01 && rc.isBuildReady()) {
 //      rc.buildRobot(RobotType.LUMBERJACK, dir);
-    } else if (rc.canBuildRobot(RobotType.SCOUT, dir) && Math.random() < .01) {
+    } else if (rc.canBuildRobot(RobotType.SCOUT, dir) && Math.random() < .2) {
       rc.buildRobot(RobotType.SCOUT, dir);
     } else if (rc.canBuildRobot(RobotType.LUMBERJACK, dir) && Math.random() < .01) {
       rc.buildRobot(RobotType.LUMBERJACK, dir);
     }
-
     // Move randomly
-    if (!evade())
-      tryMove(randomDirection());
+    if (!evade() && adjacentTrees.length<3) tryMove(randomDirection());
+  }
+
+
+  static int weakestAdjacentTree(TreeInfo[] trees) throws GameActionException {
+    try {
+      int weakestTree = -1;
+      float minHealth = Float.POSITIVE_INFINITY;
+      float health;
+
+      for (int i=0; i<trees.length; i++) {
+        health = trees[i].getHealth();
+        if (health < minHealth) {
+          minHealth = health;
+          weakestTree = trees[i].getID();
+        }
+      }
+    return weakestTree;
+    } catch (Exception e) {
+      System.out.println("Weakest Tree Exception");
+      return -1;
+    }
   }
 }
