@@ -10,7 +10,7 @@ public strictfp class Utils {
    * @param bullet The bullet in question
    * @return True if the line of the bullet's path intersects with this robot's current position.
    */
-  static boolean willCollideWithMe(RobotController rc, BulletInfo bullet) {
+  public static boolean willCollideWithMe(RobotController rc, BulletInfo bullet) {
     MapLocation myLocation = rc.getLocation();
 
     // Get relevant bullet information
