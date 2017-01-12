@@ -45,8 +45,14 @@ public strictfp class Bot {
    * @return true if a move was performed
    * @throws GameActionException
    */
+
   static boolean tryMove(Direction dir) throws GameActionException {
     return tryMove(dir,20,3);
+  }
+
+  static boolean tryMove(RobotController rc, MapLocation ml) throws GameActionException
+  {
+    return tryMove(rc.getLocation().directionTo(ml));
   }
 
   /**
@@ -60,35 +66,38 @@ public strictfp class Bot {
    */
   static boolean tryMove(Direction dir, float degreeOffset, int checksPerSide) throws GameActionException {
 
-    // First, try intended direction
-    if (rc.canMove(dir) && !rc.hasMoved()) {
-      rc.move(dir);
-      return true;
-    }
-
-    // Now try a bunch of similar angles
-    boolean moved = false;
-    int currentCheck = 1;
-
-    while(currentCheck<=checksPerSide) {
-      // Try the offset of the left side
-      if(rc.canMove(dir.rotateLeftDegrees(degreeOffset*currentCheck))) {
-        rc.move(dir.rotateLeftDegrees(degreeOffset*currentCheck));
+    if (!rc.hasMoved())
+    {
+      // First, try intended direction
+      if (rc.canMove(dir)) {
+        rc.move(dir);
         return true;
       }
-      // Try the offset on the right side
-      if(rc.canMove(dir.rotateRightDegrees(degreeOffset*currentCheck))) {
-        rc.move(dir.rotateRightDegrees(degreeOffset*currentCheck));
-        return true;
+
+      // Now try a bunch of similar angles
+      boolean moved = false;
+      int currentCheck = 1;
+
+      while(currentCheck<=checksPerSide) {
+        // Try the offset of the left side
+        if(rc.canMove(dir.rotateLeftDegrees(degreeOffset*currentCheck))) {
+          rc.move(dir.rotateLeftDegrees(degreeOffset*currentCheck));
+          return true;
+        }
+        // Try the offset on the right side
+        if(rc.canMove(dir.rotateRightDegrees(degreeOffset*currentCheck))) {
+          rc.move(dir.rotateRightDegrees(degreeOffset*currentCheck));
+          return true;
+        }
+        // No move performed, try slightly further
+        currentCheck++;
       }
-      // No move performed, try slightly further
-      currentCheck++;
     }
+
 
     // A move never happened, so return false.
     return false;
   }
-
   public static boolean willCollideWithMe(BulletInfo bullet) {
     MapLocation myLocation = rc.getLocation();
 

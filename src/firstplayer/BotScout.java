@@ -1,6 +1,8 @@
 package firstplayer;
 
 import battlecode.common.*;
+import bcutils.Broadcasting;
+import bcutils.Utils;
 
 public strictfp class BotScout extends Bot {
   public static void loop(RobotController rc_) {
@@ -27,6 +29,7 @@ public strictfp class BotScout extends Bot {
     explore();
     tryShake();
     harass();
+    sendReceiveIntel();
   }
   
   public static void tryShake() throws GameActionException {
@@ -43,7 +46,12 @@ public strictfp class BotScout extends Bot {
 
   static void explore() throws GameActionException {
       if (!evade())
-          tryMove(randomDirection());
+      {
+          int numArchons = rc.readBroadcast(Broadcasting.ARCHON_NUMBER);
+          System.out.println("I'm trying to move to:" + Broadcasting.readBroadcastLocation(rc,(myID % numArchons) * 2));
+          MapLocation previousArchon = Broadcasting.readBroadcastLocation(rc,(myID % numArchons) * 2);
+          tryMove(rc,previousArchon); //Randomly associate all scouts with exactly one archon
+      }
   }
 
     static void harass() throws GameActionException {
@@ -57,5 +65,17 @@ public strictfp class BotScout extends Bot {
                 rc.fireSingleShot(rc.getLocation().directionTo(robots[0].location));
             }
         }
+    }
+    static void sendReceiveIntel() throws GameActionException
+    {
+      RobotInfo[] robots = rc.senseNearbyRobots(-1);
+      for (RobotInfo robot : robots)
+      {
+        if (robot.getType() == RobotType.ARCHON && robot.getTeam() == them)
+        {
+          System.out.println("New Archon Coordinates Found:" + robot.getLocation().x + ":" + robot.getLocation().y);
+          Broadcasting.updateArchon(rc,robot.getLocation());
+        }
+      }
     }
 }

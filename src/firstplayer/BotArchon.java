@@ -4,10 +4,17 @@ import battlecode.common.*;
 import bcutils.*;
 
 public strictfp class BotArchon extends Bot {
-  public static void loop(RobotController rc_) {
+  public static void loop(RobotController rc_) throws GameActionException {
     System.out.println("I'm an Archon!");
     Bot.init(rc_);
     int endTurnRoundNum;
+    rc_.broadcast(Broadcasting.ARCHON_NUMBER,rc.getInitialArchonLocations(us).length);
+    MapLocation[] archons = rc_.getInitialArchonLocations(them);
+    Broadcasting.broadcastLocation(rc_,Broadcasting.ARCHON1,archons[0]);
+    if (archons.length > 1)
+      Broadcasting.broadcastLocation(rc_,Broadcasting.ARCHON2,archons[1]);
+    if (archons.length > 2)
+      Broadcasting.broadcastLocation(rc_,Broadcasting.ARCHON3,archons[2]);
     while (true) {
       try {
         update();
@@ -37,9 +44,9 @@ public strictfp class BotArchon extends Bot {
     evade();
 
     // Broadcast archon's location for other robots on the team to know
-    MapLocation myLocation = rc.getLocation();
-    rc.broadcast(0, (int) myLocation.x);
-    rc.broadcast(1, (int) myLocation.y);
+    //MapLocation myLocation = rc.getLocation();
+    //rc.broadcast(0, (int) myLocation.x);
+    //rc.broadcast(1, (int) myLocation.y);
   }
 
   public static void trySpawn() throws GameActionException {

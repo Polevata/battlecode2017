@@ -31,7 +31,7 @@ public strictfp class BotLumber extends Bot {
 
     // Move randomly
       evade();
-      RobotInfo[] robots = rc.senseNearbyRobots(GameConstants.LUMBERJACK_STRIKE_RADIUS,them);
+      RobotInfo[] robots = rc.senseNearbyRobots(RobotType.LUMBERJACK.bodyRadius+GameConstants.LUMBERJACK_STRIKE_RADIUS,them);
       // If there are some...
     System.out.println(robots.length);
       if (robots.length > 0 && rc.canStrike()) {
