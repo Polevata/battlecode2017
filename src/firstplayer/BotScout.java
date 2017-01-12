@@ -48,9 +48,16 @@ public strictfp class BotScout extends Bot {
       if (!evade())
       {
           int numArchons = rc.readBroadcast(Broadcasting.ARCHON_NUMBER);
-          System.out.println("I'm trying to move to:" + Broadcasting.readBroadcastLocation(rc,(myID % numArchons) * 2));
-          MapLocation previousArchon = Broadcasting.readBroadcastLocation(rc,(myID % numArchons) * 2);
-          tryMove(rc,previousArchon); //Randomly associate all scouts with exactly one archon
+          if (numArchons > 0)
+          {
+            int myArchonFirstSlot = (myID % numArchons) * Broadcasting.SLOTS_USED_PER_LOCATION;
+            MapLocation previousArchon = Broadcasting.readBroadcastLocation(rc,myArchonFirstSlot);
+            int roundsSinceSeen = roundNum-rc.readBroadcast(myArchonFirstSlot+2);
+            //if ()
+            //use delta round number multiplied by degrees
+            MapLocation moveTo = previousArchon.add((float)(2*Math.PI/100*roundsSinceSeen),roundsSinceSeen/20);
+            tryMove(rc,moveTo); //Randomly associate all scouts with exactly one archon
+          }
       }
   }
 
@@ -73,8 +80,12 @@ public strictfp class BotScout extends Bot {
       {
         if (robot.getType() == RobotType.ARCHON && robot.getTeam() == them)
         {
-          System.out.println("New Archon Coordinates Found:" + robot.getLocation().x + ":" + robot.getLocation().y);
-          Broadcasting.updateArchon(rc,robot.getLocation());
+          Broadcasting.updateArchon(rc,robot.getLocation(),roundNum);
+          /*if (robot.health < 10)
+          {
+            Broadcasting.deadArchon(rc,robot.getLocation(),roundNum);
+            System.out.println("An Archon is Dead");
+          }*/
         }
       }
     }
