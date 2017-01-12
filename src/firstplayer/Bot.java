@@ -17,9 +17,9 @@ public strictfp class Bot {
   public static int roundNum;
   public static int roundNumBirth;
 
-  public static boolean plant = true;
+  final static boolean plant = true;
   
-  public static void init(RobotController rc_) {
+  static void init(RobotController rc_) {
     rc = rc_;
     myType = rc.getType();
     myID = rc.getID();
@@ -32,7 +32,7 @@ public strictfp class Bot {
     roundNumBirth = roundNum;
   }
 
-  public static void update() {
+  static void update() {
     here = rc.getLocation();
     roundNum = rc.getRoundNum();
   }
@@ -73,7 +73,9 @@ public strictfp class Bot {
 
     if (!rc.hasMoved())
     {
+      BulletInfo[] walkableBullets = rc.senseNearbyBullets(myType.strideRadius + myType.bodyRadius); //We need to have something like this to prevent walking into bullets
       // First, try intended direction
+
       if (rc.canMove(dir)) {
         rc.move(dir);
         return true;
@@ -139,11 +141,17 @@ public strictfp class Bot {
       b = nearbyBullets[i];
       if (willCollideWithMe(b)) {
         noDangerousBullet = false;
-        netX += b.dir.getDeltaX(1) / b.getLocation().distanceTo(here);
-        netY += b.dir.getDeltaY(1) / b.getLocation().distanceTo(here);
+        netX += b.dir.getDeltaX(1) / Math.pow(b.getLocation().distanceTo(here),2);
+        netY += b.dir.getDeltaY(1) / Math.pow(b.getLocation().distanceTo(here),2);
       }
     }
     if (noDangerousBullet) {
+      RobotInfo[] nearbyBots = rc.senseNearbyRobots(-1,them);
+      for (RobotInfo r : nearbyBots)
+      {
+        if (r.getType() == RobotType.LUMBERJACK && r.getLocation().distanceTo(here) < RobotType.LUMBERJACK.bodyRadius + GameConstants.LUMBERJACK_STRIKE_RADIUS*5)
+          return tryMove(r.getLocation().directionTo(here),30,3);
+      }
       return false;
     }
     Direction averageDirection = new Direction(netX,netY);

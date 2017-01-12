@@ -5,7 +5,7 @@ import battlecode.common.*;
 public strictfp class BotSoldier extends Bot {
 
   public static void loop(RobotController rc_) {
-    System.out.println("I'm a bot!");
+    System.out.println("I'm a Soldier!");
     Bot.init(rc_);
     int endTurnRoundNum;
     while (true) {
@@ -35,7 +35,7 @@ public strictfp class BotSoldier extends Bot {
         // ...Then fire a bullet in the direction of the enemy.
         Direction dir = here.directionTo(robots[0].location);
         rc.fireSingleShot(dir);
-        tryMove(dir.opposite());
+        //tryMove(dir.opposite());
       }
     }
 

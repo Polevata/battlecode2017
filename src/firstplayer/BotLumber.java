@@ -33,7 +33,6 @@ public strictfp class BotLumber extends Bot {
       evade();
       RobotInfo[] robots = rc.senseNearbyRobots(RobotType.LUMBERJACK.bodyRadius+GameConstants.LUMBERJACK_STRIKE_RADIUS,them);
       // If there are some...
-    System.out.println(robots.length);
       if (robots.length > 0 && rc.canStrike()) {
         // And we have enough bullets, and haven't attacked yet this turn...
         rc.strike();
