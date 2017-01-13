@@ -15,6 +15,7 @@ public strictfp class Bot {
   
   public static MapLocation here;
   public static int roundNum;
+  public static int roundNumBirth;
 
   public static boolean plant = true;
   
@@ -28,6 +29,7 @@ public strictfp class Bot {
 
     here = rc.getLocation();
     roundNum = rc.getRoundNum();
+    roundNumBirth = roundNum;
   }
 
   public static void update() {
@@ -64,6 +66,9 @@ public strictfp class Bot {
    * @return true if a move was performed
    * @throws GameActionException
    */
+
+
+
   static boolean tryMove(Direction dir, float degreeOffset, int checksPerSide) throws GameActionException {
 
     if (!rc.hasMoved())

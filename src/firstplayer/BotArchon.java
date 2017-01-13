@@ -34,7 +34,9 @@ public strictfp class BotArchon extends Bot {
 
   public static void doTurn() throws GameActionException {
     // Generate a random direction
-    Direction dir = Utils.randomDirection();
+    //Direction dir = Utils.randomDirection();
+
+    Direction dir = BotGardener.awayFromArchons();
 
     // Randomly attempt to build a gardener in this direction
     if (rc.canHireGardener(dir) && ((plant && rc.getRobotCount()>rc.getTreeCount()) || Math.random()<0.01)){
