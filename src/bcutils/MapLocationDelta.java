@@ -1,6 +1,7 @@
 package bcutils;
 
 import battlecode.common.Direction;
+import battlecode.common.MapLocation;
 
 public class MapLocationDelta {
   private float x, y;
@@ -39,6 +40,10 @@ public class MapLocationDelta {
   public void add(MapLocationDelta r2) {
     x += r2.x;
     y += r2.y;
+  }
+  
+  public MapLocation addTo(MapLocation l) {
+    return new MapLocation(l.x + x, l.y + y);
   }
   
   public void scaleTo(float newLength) {
