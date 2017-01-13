@@ -32,9 +32,29 @@ public class MapLocationDelta {
     return x * x + y * y;
   }
 
+  public float dot(MapLocationDelta r2) {
+    return x * r2.x + y * r2.y;
+  }
+  
+  public float dot(float x2, float y2) {
+    return x * x2 + y * y2;
+  }
+
+  /*
+   * Returns the MapLocationDelta projected onto dir
+   * 
+   * If Direction can be represented by unit vector \hat{n}, and the current
+   * MapLocationDelta is \vec{r}, then the result of this operation is
+   * (\vec{r} \cdot \hat{n}) \hat{n}
+   * 
+   * @param dir: Direction to be projected onto
+   */
   public void projectOnto(Direction dir) {
-    x *= dir.getDeltaX(1);
-    y *= dir.getDeltaY(2);
+    float dx = dir.getDeltaX(1);
+    float dy = dir.getDeltaY(1);
+    float dotProd = dot(dx, dy);
+    x = dx * dotProd;
+    y = dy * dotProd;
   }
 
   public void add(MapLocationDelta r2) {
