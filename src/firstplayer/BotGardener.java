@@ -4,10 +4,12 @@ import battlecode.common.*;
 import bcutils.Broadcasting;
 import sun.reflect.generics.tree.Tree;
 
+import javax.sound.midi.SysexMessage;
+
 public strictfp class BotGardener extends Bot {
 
-  public final static int DENSITY = 3;
-  public final static int INITIAL_MOVES = 25;
+  public final static int DENSITY = 4;
+  public final static int INITIAL_MOVES = 15;
   public static int trees=0;
   public static int[] myTrees;
 
@@ -43,16 +45,17 @@ public strictfp class BotGardener extends Bot {
 
 
     if(roundNum-roundNumBirth < INITIAL_MOVES && rc.getTreeCount()<rc.getRobotCount()) {
-      tryMove(awayFromArchons(), (float)Math.PI/12, 4);
+      tryMove(approxAwayFromArchons(2), (float)Math.PI/15, 10);
     }
     else {
       Direction dir = randomDirection();
       TreeInfo[] adjacentTrees = rc.senseNearbyTrees(2);
-      int weakestTree = weakestAdjacentTree(adjacentTrees);
-      if (weakestTree!=-1) rc.water(weakestTree);
+      TreeInfo[] nearbyTrees = rc.senseNearbyTrees();
 
-      if (plant && adjacentTrees.length < DENSITY && rc.getTreeCount() < rc.getRobotCount() && rc.canPlantTree(dir)) {
+      int tree = weakestTree(nearbyTrees);
+      if (tree!=-1) rc.water(tree);
 
+      if (plant && adjacentTrees.length < DENSITY && (rc.getTreeCount() < rc.getRobotCount()) && rc.canPlantTree(dir)) {
         rc.plantTree(dir);
       }
 
@@ -72,7 +75,7 @@ public strictfp class BotGardener extends Bot {
   }
 
 
-  static int weakestAdjacentTree(TreeInfo[] trees) throws GameActionException {
+  static int weakestTree(TreeInfo[] trees) throws GameActionException {
     try {
       int weakestTree = -1;
       float minHealth = Float.POSITIVE_INFINITY;
@@ -104,8 +107,9 @@ public strictfp class BotGardener extends Bot {
       robotType = sensedRobot.getType();
       if (robotType == RobotType.ARCHON || robotType == RobotType.GARDENER) {
         robotDirection = sensedRobot.getLocation().directionTo(here);
+        System.out.println(robotDirection);
         if (robotType == RobotType.ARCHON)
-          robotDistance = here.distanceSquaredTo(sensedRobot.getLocation())/5;
+          robotDistance = here.distanceSquaredTo(sensedRobot.getLocation())/2;
         else
           robotDistance = here.distanceTo(sensedRobot.getLocation());
         netX += robotDirection.getDeltaX(1) / robotDistance;
@@ -113,5 +117,15 @@ public strictfp class BotGardener extends Bot {
       }
     }
     return new Direction(netX, netY);
+  }
+
+  static Direction approxAwayFromArchons(int ratio) throws GameActionException{
+    Direction away = awayFromArchons();
+    float x = away.getDeltaX(ratio);
+    float y = away.getDeltaY(ratio);
+    Direction randomDir = randomDirection();
+    x += randomDir.getDeltaX(1);
+    y += randomDir.getDeltaY(1);
+    return new Direction(x, y);
   }
 }

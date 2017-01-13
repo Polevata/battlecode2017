@@ -26,6 +26,8 @@ public strictfp class Bot {
     us = rc.getTeam();
     them = us.opponent();
     random = new Random(myID);
+    RobotInfo[] nearbyBots = rc.senseNearbyRobots();
+    TreeInfo[] nearbyTrees = rc.senseNearbyTrees();
 
     here = rc.getLocation();
     roundNum = rc.getRoundNum();
