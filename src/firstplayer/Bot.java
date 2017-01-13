@@ -1,6 +1,7 @@
 package firstplayer;
 
 import battlecode.common.*;
+import bcutils.Broadcasting;
 
 import java.util.ArrayList;
 import java.util.Random;
@@ -8,16 +9,19 @@ import java.util.Random;
 public strictfp class Bot {
   public static RobotController rc;
   public static RobotType myType;
+  public static int myTypeBroadcastNum;
   public static int myID;
   public static Team us;
   public static Team them;
+  public static boolean reportAlive;
+  public static float health;
   public static Random random;
-  
+
   public static MapLocation here;
   public static int roundNum;
   public static int roundNumBirth;
 
-  final static boolean plant = true;
+  public static boolean plant = true;
   
   static void init(RobotController rc_) {
     rc = rc_;
@@ -25,18 +29,27 @@ public strictfp class Bot {
     myID = rc.getID();
     us = rc.getTeam();
     them = us.opponent();
+    health = rc.getHealth();
+    reportAlive = true;
     random = new Random(myID);
+
     RobotInfo[] nearbyBots = rc.senseNearbyRobots();
     TreeInfo[] nearbyTrees = rc.senseNearbyTrees();
 
     here = rc.getLocation();
     roundNum = rc.getRoundNum();
     roundNumBirth = roundNum;
+    Broadcasting.incrementRobotType(rc, myType);
   }
+
 
   static void update() {
     here = rc.getLocation();
     roundNum = rc.getRoundNum();
+    health = rc.getHealth();
+    if(reportAlive && health < 10) {
+      Broadcasting.decrementRobotType(rc, myType);
+    }
   }
   public static Direction randomDirection() {
     return new Direction(random.nextFloat() * 2 * (float) Math.PI);
@@ -73,8 +86,7 @@ public strictfp class Bot {
 
   static boolean tryMove(Direction dir, float degreeOffset, int checksPerSide) throws GameActionException {
 
-    if (!rc.hasMoved())
-    {
+    if (!rc.hasMoved()) {
       BulletInfo[] walkableBullets = rc.senseNearbyBullets(myType.strideRadius + myType.bodyRadius); //We need to have something like this to prevent walking into bullets
       // First, try intended direction
 

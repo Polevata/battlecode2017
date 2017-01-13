@@ -39,7 +39,7 @@ public strictfp class BotArchon extends Bot {
     Direction dir = BotGardener.awayFromArchons();
 
     // Randomly attempt to build a gardener in this direction
-    if (rc.canHireGardener(dir) && ((plant && rc.getRobotCount()>2*rc.getTreeCount()) || Math.random()<0.01)){
+    if (rc.canHireGardener(dir) && plant && (rc.getRobotCount()>rc.getTreeCount() || Math.random()<0.01*rc.getTeamBullets()) ){
         rc.hireGardener(dir);
     }
 
