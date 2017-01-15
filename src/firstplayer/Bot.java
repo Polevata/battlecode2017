@@ -1,6 +1,8 @@
 package firstplayer;
 
 import battlecode.common.*;
+import bcutils.Actions.*;
+import bcutils.Actions;
 import bcutils.Broadcasting;
 
 import java.util.ArrayList;
@@ -63,13 +65,13 @@ public strictfp class Bot {
    * @throws GameActionException
    */
 
-  static boolean tryMove(Direction dir) throws GameActionException {
-    return tryMove(dir,20,3);
+  static boolean tryAction(ActionType action, Direction dir) throws GameActionException {
+    return tryAction(action, dir,20,3);
   }
 
-  static boolean tryMove(RobotController rc, MapLocation ml) throws GameActionException
+  static boolean tryAction(ActionType action, RobotController rc, MapLocation ml) throws GameActionException
   {
-    return tryMove(rc.getLocation().directionTo(ml));
+    return tryAction(action, rc.getLocation().directionTo(ml));
   }
 
   /**
@@ -82,39 +84,31 @@ public strictfp class Bot {
    * @throws GameActionException
    */
 
+  static boolean tryAction(ActionType action, Direction dir, float degreeOffset, int checksPerSide) throws GameActionException {
 
-
-  static boolean tryMove(Direction dir, float degreeOffset, int checksPerSide) throws GameActionException {
-
-    if (!rc.hasMoved()) {
+    if (!rc.hasMoved() && action==ActionType.MOVE) {
       BulletInfo[] walkableBullets = rc.senseNearbyBullets(myType.strideRadius + myType.bodyRadius); //We need to have something like this to prevent walking into bullets
       // First, try intended direction
-
-      if (rc.canMove(dir)) {
-        rc.move(dir);
+      if (Actions.dispatchAction(rc, action, dir)) {
         return true;
       }
-
       // Now try a bunch of similar angles
       boolean moved = false;
       int currentCheck = 1;
 
       while(currentCheck<=checksPerSide) {
         // Try the offset of the left side
-        if(rc.canMove(dir.rotateLeftDegrees(degreeOffset*currentCheck))) {
-          rc.move(dir.rotateLeftDegrees(degreeOffset*currentCheck));
+        if(Actions.dispatchAction(rc, action, dir.rotateLeftDegrees(degreeOffset*currentCheck))) {
           return true;
         }
         // Try the offset on the right side
-        if(rc.canMove(dir.rotateRightDegrees(degreeOffset*currentCheck))) {
-          rc.move(dir.rotateRightDegrees(degreeOffset*currentCheck));
+        if(Actions.dispatchAction(rc, action, dir.rotateRightDegrees(degreeOffset*currentCheck))) {
           return true;
         }
         // No move performed, try slightly further
         currentCheck++;
       }
     }
-
 
     // A move never happened, so return false.
     return false;
@@ -164,11 +158,11 @@ public strictfp class Bot {
       for (RobotInfo r : nearbyBots)
       {
         if (r.getType() == RobotType.LUMBERJACK && r.getLocation().distanceTo(here) < RobotType.LUMBERJACK.bodyRadius + GameConstants.LUMBERJACK_STRIKE_RADIUS*5)
-          return tryMove(r.getLocation().directionTo(here),30,3);
+          return tryAction(ActionType.MOVE, r.getLocation().directionTo(here),30,3);
       }
       return false;
     }
     Direction averageDirection = new Direction(netX,netY);
-    return tryMove(averageDirection.rotateLeftDegrees(90)) || tryMove(averageDirection.rotateRightDegrees(90));
+    return tryAction(ActionType.MOVE, averageDirection.rotateLeftDegrees(90)) || tryAction(ActionType.MOVE, averageDirection.rotateRightDegrees(90));
   }
 }

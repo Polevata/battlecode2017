@@ -1,6 +1,7 @@
 package firstplayer;
 
 import battlecode.common.*;
+import bcutils.Actions.*;
 import bcutils.Broadcasting;
 import sun.reflect.generics.tree.Tree;
 
@@ -47,7 +48,7 @@ public strictfp class BotGardener extends Bot {
     if(roundNum-roundNumBirth < INITIAL_MOVES) {
       System.out.println("round");
       System.out.println(roundNum-roundNumBirth);
-      tryMove(approxAwayFromArchons(4), 10, 9);
+      tryAction(ActionType.MOVE, approxAwayFromArchons(4), 10, 9);
     }
     else {
       Direction dir = randomDirection();

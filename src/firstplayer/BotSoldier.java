@@ -1,6 +1,7 @@
 package firstplayer;
 
 import battlecode.common.*;
+import bcutils.Actions.*;
 
 public strictfp class BotSoldier extends Bot {
 
@@ -40,7 +41,7 @@ public strictfp class BotSoldier extends Bot {
     }
 
     // Move randomly
-    tryMove(randomDirection());
+    tryAction(ActionType.MOVE, randomDirection());
   }
 
 }
