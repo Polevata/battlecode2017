@@ -36,10 +36,11 @@ public strictfp class BotGardener extends Bot {
   }
 
   public static void doTurn() throws GameActionException {
-    // Listen for home archon's location
-    int xPos = rc.readBroadcast(0);
-    int yPos = rc.readBroadcast(1);
-    MapLocation archonLoc = new MapLocation(xPos,yPos);
+    // XListen for home archon's locationX
+    //Not true anymore
+    //int xPos = rc.readBroadcast(0);
+    //int yPos = rc.readBroadcast(1);
+    //MapLocation archonLoc = new MapLocation(xPos,yPos);
 
     // Generate a random direction
     //Direction dir = randomDirection();

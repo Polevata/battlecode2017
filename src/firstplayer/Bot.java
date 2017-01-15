@@ -45,13 +45,15 @@ public strictfp class Bot {
   }
 
 
-  static void update() {
+  static void update() throws GameActionException {
     here = rc.getLocation();
     roundNum = rc.getRoundNum();
     health = rc.getHealth();
     if(reportAlive && health < 10) {
       Broadcasting.decrementRobotType(rc, myType);
     }
+    if (rc.getTeamBullets() >= 10000 && !RobotPlayer.DEBUGGING)
+      rc.donate(10000);
   }
   public static Direction randomDirection() {
     return new Direction(random.nextFloat() * 2 * (float) Math.PI);

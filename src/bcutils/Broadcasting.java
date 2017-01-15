@@ -45,29 +45,46 @@ public strictfp class Broadcasting {
     int numArchons = rc.readBroadcast(ARCHON_NUMBER);
     for (int i = 0; i<numArchons; i++)
     {
-      MapLocation previousArchon = new MapLocation(rc.readBroadcast(ARCHON1),rc.readBroadcast(ARCHON1+1));
-      if (previousArchon.distanceTo(archon) < distanceToNearest)
+      MapLocation previousArchon = new MapLocation(rc.readBroadcast((i*SLOTS_USED_PER_LOCATION)+ARCHON1),rc.readBroadcast((i*SLOTS_USED_PER_LOCATION)+ARCHON1+1));
+      float newDist = previousArchon.distanceTo(archon);
+      if (newDist < distanceToNearest)
+      {
         whichArchon = i;
+        distanceToNearest = newDist;
+      }
     }
     switch (whichArchon)
     {
       case 0:
         if (numArchons == 3)
+        {
           broadcastLocation(rc,ARCHON1,readBroadcastLocation(rc,ARCHON3),roundNumber);
+          rc.broadcast(ARCHON_NUMBER,2);
+        }
         else if (numArchons == 2)
+        {
           broadcastLocation(rc,ARCHON1,readBroadcastLocation(rc,ARCHON2),roundNumber);
+          rc.broadcast(ARCHON_NUMBER,1);
+        }
+        else
+          rc.broadcast(ARCHON_NUMBER,0);
         System.out.println("First Archon Died");
         break;
       case 1:
         if (numArchons == 3)
+        {
           broadcastLocation(rc,ARCHON2,readBroadcastLocation(rc,ARCHON3),roundNumber);
+          rc.broadcast(ARCHON_NUMBER,2);
+        }
+        else if (numArchons == 2)
+          rc.broadcast(ARCHON_NUMBER,1);
         System.out.println("Second Archon Died");
         break;
       default:
+        rc.broadcast(ARCHON_NUMBER,2);
         System.out.println("Third Archon Died");
         break;
     }
-    rc.broadcast(ARCHON_NUMBER,numArchons-1);
   }
 
   public static void broadcastLocation(RobotController rc, int channel, MapLocation loc, int roundNumber) throws GameActionException
