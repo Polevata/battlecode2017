@@ -86,33 +86,34 @@ public strictfp class Bot {
 
   static boolean tryAction(ActionType action, Direction dir, float degreeOffset, int checksPerSide) throws GameActionException {
 
-    if (!rc.hasMoved() && action==ActionType.MOVE) {
-      BulletInfo[] walkableBullets = rc.senseNearbyBullets(myType.strideRadius + myType.bodyRadius); //We need to have something like this to prevent walking into bullets
-      // First, try intended direction
-      if (Actions.dispatchAction(rc, action, dir)) {
+    BulletInfo[] walkableBullets = rc.senseNearbyBullets(myType.strideRadius + myType.bodyRadius); //We need to have something like this to prevent walking into bullets
+    // First, try intended direction
+
+    if (Actions.dispatchAction(rc, action, dir)) {
+      System.out.println("PLANT_TRUE");
+      return true;
+    }
+    // Now try a bunch of similar angles
+    boolean moved = false;
+    int currentCheck = 1;
+
+    while(currentCheck<=checksPerSide) {
+      // Try the offset of the left side
+      if(Actions.dispatchAction(rc, action, dir.rotateLeftDegrees(degreeOffset*currentCheck))) {
         return true;
       }
-      // Now try a bunch of similar angles
-      boolean moved = false;
-      int currentCheck = 1;
-
-      while(currentCheck<=checksPerSide) {
-        // Try the offset of the left side
-        if(Actions.dispatchAction(rc, action, dir.rotateLeftDegrees(degreeOffset*currentCheck))) {
-          return true;
-        }
-        // Try the offset on the right side
-        if(Actions.dispatchAction(rc, action, dir.rotateRightDegrees(degreeOffset*currentCheck))) {
-          return true;
-        }
-        // No move performed, try slightly further
-        currentCheck++;
+      // Try the offset on the right side
+      if(Actions.dispatchAction(rc, action, dir.rotateRightDegrees(degreeOffset*currentCheck))) {
+        return true;
       }
+      // No move performed, try slightly further
+      currentCheck++;
     }
 
-    // A move never happened, so return false.
-    return false;
+   // A move never happened, so return false.
+   return false;
   }
+
   public static boolean willCollideWithMe(BulletInfo bullet) {
     MapLocation myLocation = rc.getLocation();
 

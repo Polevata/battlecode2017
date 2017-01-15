@@ -9,7 +9,7 @@ import javax.sound.midi.SysexMessage;
 
 public strictfp class BotGardener extends Bot {
 
-  public final static int DENSITY = 4;
+  public final static int DENSITY = 5;
   public final static int INITIAL_MOVES = 30;
   public static int trees=0;
   public static int[] myTrees;
@@ -59,19 +59,23 @@ public strictfp class BotGardener extends Bot {
       if (patient!=-1) rc.water(patient);
 
       if (plant && adjacentTrees.length < DENSITY && rc.canPlantTree(dir)) {
-        rc.plantTree(dir);
+        tryAction(ActionType.PLANT, awayFromArchons().opposite(), 15, 6);
       }
 
+      boolean canBuild = true;
       // Randomly attempt to build a soldier or lumberjack in this direction
-      if (rc.canBuildRobot(RobotType.SCOUT, dir) && Math.random() < .001 * rc.getTeamBullets()) {
-        rc.buildRobot(RobotType.SCOUT, dir);
-//    } else if (rc.canBuildRobot(RobotType.LUMBERJACK, dir) && Math.random() < .01 && rc.isBuildReady()) {
-//      rc.buildRobot(RobotType.LUMBERJACK, dir);
-      } else if (rc.canBuildRobot(RobotType.SOLDIER, dir) && Math.random() < .001 * rc.getTeamBullets()) {
-        rc.buildRobot(RobotType.SOLDIER, dir);
-      } else if (rc.canBuildRobot(RobotType.LUMBERJACK, dir) && Math.random() < .001 * rc.getTeamBullets()) {
-        rc.buildRobot(RobotType.LUMBERJACK, dir);
+      if(rc.isBuildReady()) {
+        if (Math.random() < .001 * rc.getTeamBullets()) {
+          tryAction(ActionType.BUILD_SCOUT, dir, 15,6);
+  //    } else if (Math.random() < .001*rc.getTeamBullets()) {
+  //      rc.buildRobot(RobotType.LUMBERJACK, dir);
+        } else if (Math.random() < .001 * rc.getTeamBullets()) {
+          tryAction(ActionType.BUILD_SOLDIER, dir, 15, 6);
+        } else if (Math.random() < .001 * rc.getTeamBullets()) {
+          tryAction(ActionType.BUILD_LUMBERJACK, dir, 15, 6);
+        }
       }
+
       // Move randomly
       //if (!evade() && adjacentTrees.length < DENSITY) tryMove(randomDirection());
     }

@@ -26,14 +26,28 @@ public class Actions{
         }
         return false;
       default:
-        RobotType buildType;
+        RobotType buildType = RobotType.SCOUT;
 
         switch(action){
-          case BUILD_GARDENER: buildType = RobotType.GARDENER;
-          case BUILD_LUMBERJACK: buildType = RobotType.LUMBERJACK;
-          case BUILD_SCOUT: buildType = RobotType.SCOUT;
-          case BUILD_SOLDIER: buildType = RobotType.SOLDIER;
-          default: buildType = RobotType.TANK;
+          case BUILD_GARDENER:
+            buildType = RobotType.GARDENER;
+            break;
+          case BUILD_LUMBERJACK:
+            buildType = RobotType.LUMBERJACK;
+            break;
+          case BUILD_SOLDIER:
+            buildType = RobotType.SOLDIER;
+            break;
+          case BUILD_TANK:
+            buildType = RobotType.TANK;
+            break;
+        }
+
+        System.out.println(buildType);
+        System.out.println(action);
+
+        if(buildType==RobotType.TANK){
+          System.out.println("TANK");
         }
 
         if(rc.canBuildRobot(buildType, dir)) {
