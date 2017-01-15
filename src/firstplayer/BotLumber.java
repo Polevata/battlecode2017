@@ -1,6 +1,7 @@
 package firstplayer;
 
 import battlecode.common.*;
+import bcutils.Actions.*;
 
 public strictfp class BotLumber extends Bot {
   public static void loop(RobotController rc_) {
@@ -44,10 +45,10 @@ public strictfp class BotLumber extends Bot {
           MapLocation enemyLocation = robots[0].getLocation();
           Direction toEnemy = here.directionTo(enemyLocation);
 
-          tryMove(toEnemy);
+          tryAction(ActionType.MOVE, toEnemy);
         } else {
           // Move Randomly
-          tryMove(randomDirection());
+          tryAction(ActionType.MOVE, randomDirection());
         }
       }
 

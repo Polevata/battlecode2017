@@ -1,6 +1,7 @@
 package firstplayer;
 
 import battlecode.common.*;
+import bcutils.Actions.*;
 import bcutils.Broadcasting;
 import bcutils.Utils;
 
@@ -56,7 +57,7 @@ public strictfp class BotScout extends Bot {
             //if ()
             //use delta round number multiplied by degrees
             MapLocation moveTo = previousArchon.add((float)(2*Math.PI/100*roundsSinceSeen),roundsSinceSeen/20);
-            tryMove(rc,moveTo); //Randomly associate all scouts with exactly one archon
+            tryAction(ActionType.MOVE, rc,moveTo); //Randomly associate all scouts with exactly one archon
           }
       }
   }
