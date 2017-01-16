@@ -8,14 +8,14 @@ public strictfp class BotArchon extends Bot {
     System.out.println("I'm an Archon!");
     Bot.init(rc_);
     int endTurnRoundNum;
-    rc_.broadcast(Broadcasting.ARCHON_NUMBER,rc.getInitialArchonLocations(us).length);
+    rc_.broadcast(Broadcasting.ENEMY_ARCHON_NUMBER,rc.getInitialArchonLocations(us).length);
     System.out.println("Total number of Archons:" + rc.getInitialArchonLocations(us).length);
     MapLocation[] archons = rc_.getInitialArchonLocations(them);
-    Broadcasting.broadcastLocation(rc_,Broadcasting.ARCHON1,archons[0],0);
+    Broadcasting.broadcastLocation(rc_,Broadcasting.ARCHON1,archons[0],0,0);
     if (archons.length > 1)
-      Broadcasting.broadcastLocation(rc_,Broadcasting.ARCHON2,archons[1],0);
+      Broadcasting.broadcastLocation(rc_,Broadcasting.ARCHON2,archons[1],0,0);
     if (archons.length > 2)
-      Broadcasting.broadcastLocation(rc_,Broadcasting.ARCHON3,archons[2],0);
+      Broadcasting.broadcastLocation(rc_,Broadcasting.ARCHON3,archons[2],0,0);
     while (true) {
       try {
         update();
