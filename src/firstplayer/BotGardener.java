@@ -3,7 +3,6 @@ package firstplayer;
 import battlecode.common.*;
 import bcutils.Actions.*;
 import bcutils.Broadcasting;
-import sun.reflect.generics.tree.Tree;
 
 import javax.sound.midi.SysexMessage;
 

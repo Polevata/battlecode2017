@@ -1,7 +1,6 @@
 package bcutils;
 
 import battlecode.common.*;
-import scala.tools.nsc.transform.patmat.Logic;
 
 /**
  * Created by bgheneti on 1/14/17.
