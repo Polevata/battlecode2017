@@ -88,10 +88,10 @@ public strictfp class BotScout extends Bot {
         if (robot.getType() == RobotType.ARCHON && robot.getTeam() == them)
         {
             Broadcasting.updateArchon(rc, robot.getLocation(), roundNum);
-            if (robot.health < 10) {
+            /*if (robot.health < 10) {
               Broadcasting.deadArchon(rc, robot.getLocation(), roundNum);
               System.out.println("An Archon is Dead");
-            }
+            }*/
         }
       }
     }
