@@ -15,11 +15,12 @@ public strictfp class Bot {
   public static int myID;
   public static Team us;
   public static Team them;
-  public static boolean reportAlive;
-  public static float health;
   public static Random random;
+  public static boolean reportAlive;
 
+  // static variables that may change each round; modified in update()
   public static MapLocation here;
+  public static float health;
   public static int roundNum;
   public static int roundNumBirth;
 
