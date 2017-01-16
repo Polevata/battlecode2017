@@ -4,7 +4,7 @@ import battlecode.common.*;
 
 public strictfp class RobotPlayer {
 
-  public static final boolean DEBUGGING = true;
+  public static final boolean DEBUGGING = false;
 
   @SuppressWarnings("unused")
   public static void run(RobotController rc_) throws Exception {
