@@ -61,7 +61,7 @@ public strictfp class BotScout extends Bot {
             //if ()
             //use delta round number multiplied by degrees
             MapLocation moveTo = previousArchon.add((float)(2*Math.PI/100*roundsSinceSeen)*((myID%2)*2-1),roundsSinceSeen/20);
-            tryAction(ActionType.MOVE, rc,moveTo); //Randomly associate all scouts with exactly one archon
+            tryAction(ActionType.MOVE, moveTo); //Randomly associate all scouts with exactly one archon
             // System.out.println("I'm seeking Archon #" + (myArchonFirstSlot/Broadcasting.SLOTS_USED_PER_LOCATION + 1) + " at location: " + previousArchon);
 
           }

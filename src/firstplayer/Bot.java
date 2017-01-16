@@ -71,7 +71,7 @@ public strictfp class Bot {
     return tryAction(action, dir,20,3);
   }
 
-  static boolean tryAction(ActionType action, RobotController rc, MapLocation ml) throws GameActionException
+  static boolean tryAction(ActionType action, MapLocation ml) throws GameActionException
   {
     return tryAction(action, rc.getLocation().directionTo(ml));
   }
