@@ -1,6 +1,7 @@
 package firstplayer;
 
 import battlecode.common.*;
+import bcutils.Actions;
 import bcutils.Actions.*;
 
 public strictfp class BotSoldier extends Bot {
@@ -41,7 +42,14 @@ public strictfp class BotSoldier extends Bot {
     }
 
     // Move randomly
-    tryAction(ActionType.MOVE, randomDirection());
+
+    // If there is a robot, move towards it
+    if (robots.length > 0) {
+      MapLocation myLocation = rc.getLocation();
+      MapLocation enemyLocation = robots[0].getLocation();
+      Direction toEnemy = myLocation.directionTo(enemyLocation);
+      Actions.dispatchAction(rc, ActionType.MOVE, toEnemy);
+    }
   }
 
 }
