@@ -195,9 +195,11 @@ public strictfp class BotScout extends Bot {
                 }
                 else
                 {
+                    System.out.println("Gardener #" + deathIDs[i] + " was reported dead 10 rounds ago");
                     Broadcasting.deadGardener(rc,deathIDs[i]);
                 }
-                break;
+                deathIDs[i] = 0;
+                deathRounds[i] = 0;
             }
         }
     }
