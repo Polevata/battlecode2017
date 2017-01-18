@@ -5,10 +5,16 @@ import bcutils.Actions.*;
 import bcutils.Broadcasting;
 import bcutils.Utils;
 
+import java.util.ArrayList;
+
 public strictfp class BotScout extends Bot {
-  public static final int deathTime = 20; //rounds
+  public static final int deathTime = 8; //rounds
     public static int currentGardenerID = -1;
     public static int currentGardenerIndex = -1;
+    private static int victoryRound = 0;
+    private static int[] deathIDs = new int[25];
+    private static int[] deathRounds = new int[25];
+    private static boolean[] deathIsArchon = new boolean[25];
 
   public static void loop(RobotController rc_) {
     System.out.println("I'm a Scout!");
@@ -35,6 +41,7 @@ public strictfp class BotScout extends Bot {
     tryShake();
     harass();
     sendReceiveIntel();
+    reportTheDead();
   }
   
   public static void tryShake() throws GameActionException {
@@ -59,7 +66,8 @@ public strictfp class BotScout extends Bot {
       {
           int numArchons = rc.readBroadcast(Broadcasting.ENEMY_ARCHON_NUMBER);
           int numGardeners = rc.readBroadcast(Broadcasting.ENEMY_GARDENER_NUMBER);
-          System.out.println("There are " + numArchons + " Enemy Archons, and " + numGardeners + " Enemy Gardeners");
+          int numEnemyClumps = rc.readBroadcast(Broadcasting.ENEMY_CLUMP_NUMBER);
+          System.out.println("There are " + numArchons + " Enemy Archons, " + numGardeners + " Enemy Gardeners, and " + numEnemyClumps + " Enemy Clumps");
           if(roundNum %100 == 0)
             System.out.println(numArchons);
           if (numGardeners > 0)
@@ -78,7 +86,7 @@ public strictfp class BotScout extends Bot {
           }
           else if (numArchons > 0)
           {
-            int myArchonFirstSlot = (myID % numArchons) * Broadcasting.SLOTS_USED_PER_LOCATION;
+            int myArchonFirstSlot = Broadcasting.ARCHON1 + (myID % numArchons) * Broadcasting.SLOTS_USED_PER_LOCATION;
             MapLocation previousArchon = Broadcasting.readBroadcastLocation(rc,myArchonFirstSlot);
             int roundsSinceSeen = roundNum-rc.readBroadcast(myArchonFirstSlot+Broadcasting.INDEX_FOR_ROUND);
             //if ()
@@ -87,7 +95,12 @@ public strictfp class BotScout extends Bot {
             System.out.println("I'm seeking Archon #" + rc.readBroadcast(myArchonFirstSlot + Broadcasting.INDEX_FOR_ID_OR_NUM) + " at location: " + previousArchon);
           }
           else
-              tryAction(ActionType.MOVE,hover(new MapLocation(0,0),roundNum-roundNumBirth));
+          {
+              if (victoryRound == 0)
+                  victoryRound = roundNum;
+              MapLocation[] archons = rc.getInitialArchonLocations(them);
+              tryAction(ActionType.MOVE,hover(archons[myID % archons.length],roundNum+100-victoryRound));
+          }
       }
   }
 
@@ -115,7 +128,7 @@ public strictfp class BotScout extends Bot {
                   case ARCHON:
                       Broadcasting.updateArchon(rc, robot.getLocation(), roundNum,robot.ID);
                       if (robot.health < 10) {
-                        Broadcasting.deadArchon(rc, robot.ID );
+                        reportDead(robot.ID,roundNum,true);
                         System.out.println("An Archon is Dead");
                         }
                       break;
@@ -128,14 +141,65 @@ public strictfp class BotScout extends Bot {
                           currentGardenerID = robot.ID;
                       }
                       if (robot.health < 10) {
-                          Broadcasting.deadGardener(rc, robot.ID );
+                          reportDead(robot.ID,roundNum,false);
                           System.out.println("A Gardener is Dead");
                           System.out.println("This brings the gardener count down to " + rc.readBroadcast(Broadcasting.ENEMY_GARDENER_NUMBER));
                       }
                       break;
+                  default:
+                      /*Broadcasting.reportEnemy(rc,robot.getLocation(),roundNum);
+                      if (robot.health < 10)
+                      {
+                          Broadcasting.reportEnemyDead(rc,robot.getLocation(),roundNum);
+                      }*/
+                      //Not working
+                      break;
               }
           }
       }
+    }
+    static void reportDead(int ID, int round, boolean isArchon)
+    {
+        boolean foundIt = false;
+        int firstZero = -1;
+        for (int i = 0;i<25;i++)
+        {
+            if (deathIDs[i] == ID)
+            {
+                deathRounds[i] = round;
+                foundIt = true;
+                break;
+            }
+            if (firstZero == -1 && deathIDs[i] == 0)
+            {
+                firstZero = i;
+            }
+        }
+        if (!foundIt && firstZero != -1)
+        {
+            deathIDs[firstZero]=ID;
+            deathRounds[firstZero]=round;
+            deathIsArchon[firstZero]=isArchon;
+        }
+
+    }
+    static void reportTheDead() throws GameActionException
+    {
+        for (int i = 0;i<25;i++)
+        {
+            if (roundNum - deathRounds[i] >= deathTime && deathIDs[i] != 0)
+            {
+                if (deathIsArchon[i])
+                {
+                    Broadcasting.deadArchon(rc,deathIDs[i]);
+                }
+                else
+                {
+                    Broadcasting.deadGardener(rc,deathIDs[i]);
+                }
+                break;
+            }
+        }
     }
     static MapLocation hover(MapLocation m, int inaccuracyInRounds)
     {

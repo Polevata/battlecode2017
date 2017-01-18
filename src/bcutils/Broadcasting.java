@@ -14,19 +14,22 @@ public strictfp class Broadcasting {
   public static final int ARCHON1 = 0;
   public static final int ARCHON2 = ARCHON1+SLOTS_USED_PER_LOCATION;
   public static final int ARCHON3 = ARCHON2+SLOTS_USED_PER_LOCATION;
-  public static final int GARDENER1 = ARCHON3+SLOTS_USED_PER_LOCATION+1;
+  public static final int GARDENER1 = 12;
+  public static final int ENEMY_CLUMP1 = 80;
   public static final int ARCHON_NUMBER = 280;
   public static final int GARDENER_NUMBER = ARCHON_NUMBER+1;
   public static final int SOLDIER_NUMBER = ARCHON_NUMBER+2;
   public static final int TANK_NUMBER = ARCHON_NUMBER+3;
   public static final int SCOUT_NUMBER = ARCHON_NUMBER+4;
   public static final int LUMBERJACK_NUMBER = ARCHON_NUMBER+5;
-  public static final int ENEMY_ARCHON_NUMBER = ARCHON_NUMBER+6;
+  public static final int ENEMY_ARCHON_NUMBER = 286;
   public static final int ENEMY_GARDENER_NUMBER = ENEMY_ARCHON_NUMBER+1;
+  public static final int ENEMY_CLUMP_NUMBER = ENEMY_ARCHON_NUMBER+2;
 
   public static void updateArchon(RobotController rc,MapLocation archon, int roundNumber, int archonID) throws GameActionException
   {
     int numArchons = rc.readBroadcast(ENEMY_ARCHON_NUMBER);
+    System.out.println("There are " + numArchons + "Enemy Archons at the moment");
     int archonNumber = -1;
     int firstZero = -1;
     for (int i = 0; i<numArchons; i++)
@@ -48,15 +51,12 @@ public strictfp class Broadcasting {
       Conversely, if there is an empty slot found where there should be archons,
       this probably means that the game just started,
       and their ID's are not known yet
-
-      I think this needs work though. For instance, if there were 3 archons,
-      but one was presumed dead, it would now only check the first 2 slots,
-      and there might still be a zero in slot 3 that isn't being considered
        */
       if (firstZero == -1)
       {
         archonNumber = numArchons;
         rc.broadcast(ENEMY_ARCHON_NUMBER,numArchons+1);
+        System.out.println("This brings the new Archon count up to " + numArchons+1);
       }
       else
         archonNumber = firstZero;
@@ -104,6 +104,38 @@ public strictfp class Broadcasting {
     broadcastLocation(rc,GARDENER1 + SLOTS_USED_PER_LOCATION*gardenerNumber,gardener,roundNumber,gardenerID);
     return gardenerNumber;
   }
+/*
+  Changes the Archon number to the round number???
+  public static void reportEnemy(RobotController rc, MapLocation enemy, int round) throws GameActionException
+  {
+    int enemyClumps = rc.readBroadcast(ENEMY_CLUMP_NUMBER);
+    for (int i=0; i<enemyClumps;i++)
+    {
+      MapLocation currentClump = new MapLocation(rc.readBroadcast(ENEMY_CLUMP1 + SLOTS_USED_PER_LOCATION*i + INDEX_FOR_X),rc.readBroadcast(ENEMY_CLUMP1 + SLOTS_USED_PER_LOCATION*i + INDEX_FOR_Y));
+      int numEnemies = rc.readBroadcast(ENEMY_CLUMP1 + SLOTS_USED_PER_LOCATION*i + INDEX_FOR_ID_OR_NUM);
+      if (currentClump.distanceTo(enemy) < 5)
+      {
+        broadcastLocation(rc,ENEMY_CLUMP1 + SLOTS_USED_PER_LOCATION*i,new MapLocation(currentClump.x*(numEnemies-1)/numEnemies + enemy.x/numEnemies,currentClump.y*(numEnemies-1)/numEnemies + enemy.y/numEnemies),round,++numEnemies);
+        return;
+      }
+    }
+    broadcastLocation(rc,ENEMY_CLUMP1 + SLOTS_USED_PER_LOCATION*enemyClumps,enemy,round,1);
+    rc.broadcast(ENEMY_CLUMP_NUMBER,enemyClumps+1);
+  }
+  public static void reportEnemyDead(RobotController rc, MapLocation enemy, int round) throws GameActionException
+  {
+    int enemyClumps = rc.readBroadcast(ENEMY_CLUMP_NUMBER);
+    for (int i=0; i<enemyClumps;i++)
+    {
+      MapLocation currentClump = new MapLocation(rc.readBroadcast(ENEMY_CLUMP1 + SLOTS_USED_PER_LOCATION*i + INDEX_FOR_X),rc.readBroadcast(ENEMY_CLUMP1 + SLOTS_USED_PER_LOCATION*i + INDEX_FOR_Y));
+      int numEnemies = rc.readBroadcast(ENEMY_CLUMP1 + SLOTS_USED_PER_LOCATION*i + INDEX_FOR_ID_OR_NUM);
+      if (currentClump.distanceTo(enemy) < 5)
+      {
+        broadcastLocation(rc,ENEMY_CLUMP1 + SLOTS_USED_PER_LOCATION*i,new MapLocation(currentClump.x*(numEnemies-1)/numEnemies - enemy.x/numEnemies,currentClump.y*(numEnemies-1)/numEnemies - enemy.y/numEnemies),round,numEnemies-1);
+        return;
+      }
+    }
+  }*/
 
   public static void deadArchon(RobotController rc,int robotID) throws GameActionException
   {
@@ -155,7 +187,7 @@ public strictfp class Broadcasting {
   }
   public static MapLocation readBroadcastLocation(RobotController rc, int channel) throws GameActionException
   {
-    return new MapLocation(rc.readBroadcast(channel),rc.readBroadcast(channel+1));
+    return new MapLocation(rc.readBroadcast(channel+INDEX_FOR_X),rc.readBroadcast(channel+INDEX_FOR_Y));
   }
 
   public static int robotTypeBroadcastNum(RobotType type)
@@ -201,6 +233,7 @@ Locations will be in |x||y||round||ID/Grouping#| format
 80-279: Enemy clumping
 280-285: Number of each friendly unit
 286-291: Rough Number of each enemy unit
+292: Number of enemy clumps
 
  */
 
