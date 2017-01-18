@@ -166,6 +166,7 @@ public strictfp class Broadcasting {
       case SOLDIER: return Broadcasting.SOLDIER_NUMBER;
       case TANK: return Broadcasting.TANK_NUMBER;
       case LUMBERJACK: return Broadcasting.LUMBERJACK_NUMBER;
+      case ARCHON: return Broadcasting.ARCHON_NUMBER;
       default: return Broadcasting.SCOUT_NUMBER;
     }
   }

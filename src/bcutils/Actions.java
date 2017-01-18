@@ -42,13 +42,6 @@ public class Actions{
             break;
         }
 
-        System.out.println(buildType);
-        System.out.println(action);
-
-        if(buildType==RobotType.TANK){
-          System.out.println("TANK");
-        }
-
         if(rc.canBuildRobot(buildType, dir)) {
           rc.buildRobot(buildType, dir);
           return true;

@@ -46,9 +46,11 @@ public strictfp class BotGardener extends Bot {
 
 
     if(roundNum-roundNumBirth < INITIAL_MOVES) {
-      System.out.println("round");
-      System.out.println(roundNum-roundNumBirth);
-      tryAction(ActionType.MOVE, approxAwayFromArchons(4), 10, 9);
+      Direction dir = approxAwayFromArchons(4);
+      tryAction(ActionType.MOVE, dir, 10, 9);
+      if(rc.readBroadcast(Broadcasting.SOLDIER_NUMBER)+rc.readBroadcast(Broadcasting.SCOUT_NUMBER)<rc.readBroadcast(Broadcasting.GARDENER_NUMBER)){
+        tryAction(ActionType.BUILD_SCOUT, dir, 10, 12);
+      }
     }
     else {
       Direction dir = randomDirection();
@@ -69,7 +71,7 @@ public strictfp class BotGardener extends Bot {
           tryAction(ActionType.BUILD_SCOUT, dir, 15,6);
   //    } else if (Math.random() < .001*rc.getTeamBullets()) {
   //      rc.buildRobot(RobotType.LUMBERJACK, dir);
-        } else if (Math.random() < .001 * rc.getTeamBullets()) {
+        } else if (Math.random() < .002 * rc.getTeamBullets()) {
           tryAction(ActionType.BUILD_SOLDIER, dir, 15, 6);
         } else if (Math.random() < .001 * rc.getTeamBullets()) {
           tryAction(ActionType.BUILD_LUMBERJACK, dir, 15, 6);

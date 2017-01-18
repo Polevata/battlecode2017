@@ -47,6 +47,10 @@ public strictfp class Bot {
 
 
   static void update() throws GameActionException {
+    if(rc.getType()==RobotType.ARCHON){
+     System.out.println("report");
+     System.out.println(reportAlive);
+    }
     here = rc.getLocation();
     roundNum = rc.getRoundNum();
     health = rc.getHealth();
@@ -93,7 +97,6 @@ public strictfp class Bot {
     // First, try intended direction
 
     if (Actions.dispatchAction(rc, action, dir)) {
-      System.out.println("PLANT_TRUE");
       return true;
     }
     // Now try a bunch of similar angles
