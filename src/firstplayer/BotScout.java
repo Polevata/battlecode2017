@@ -86,6 +86,15 @@ public strictfp class BotScout extends Bot {
           }
           else if (numArchons > 0)
           {
+              int[] activeArchonSlots = new int[4]; //First is how many active archons have been found other 3 are potential slots for them
+              for (int i = 0; i<numArchons;i++)
+              {
+                  if (rc.readBroadcast(Broadcasting.ARCHON1 + Broadcasting.SLOTS_USED_PER_LOCATION*i + Broadcasting.INDEX_FOR_ID_OR_NUM) != 0) {
+                      activeArchonSlots[0]++;
+                      activeArchonSlots[activeArchonSlots[0]] = Broadcasting.ARCHON1 + Broadcasting.SLOTS_USED_PER_LOCATION*i;
+                      System.out.println("archon#" + activeArchonSlots[0] + " is active");
+                  }
+              }
             int myArchonFirstSlot = Broadcasting.ARCHON1 + (myID % numArchons) * Broadcasting.SLOTS_USED_PER_LOCATION;
             MapLocation previousArchon = Broadcasting.readBroadcastLocation(rc,myArchonFirstSlot);
             int roundsSinceSeen = roundNum-rc.readBroadcast(myArchonFirstSlot+Broadcasting.INDEX_FOR_ROUND);

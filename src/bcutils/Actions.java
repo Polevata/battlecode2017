@@ -7,7 +7,7 @@ import battlecode.common.*;
  */
 public class Actions{
   public enum ActionType {
-    PLANT, MOVE, BUILD_GARDENER, BUILD_SCOUT, BUILD_SOLDIER, BUILD_LUMBERJACK, BUILD_TANK
+    PLANT, MOVE, FIRE, BUILD_GARDENER, BUILD_SCOUT, BUILD_SOLDIER, BUILD_LUMBERJACK, BUILD_TANK
   }
 
   public static boolean dispatchAction(RobotController rc, ActionType action, Direction dir) throws GameActionException {
@@ -20,7 +20,20 @@ public class Actions{
         return false;
       case MOVE:
         if(rc.canMove(dir)) {
+          BulletInfo[] walkableBullets = rc.senseNearbyBullets(rc.getType().bodyRadius + rc.getType().strideRadius);
+          for (BulletInfo b : walkableBullets)
+          {
+            if (rc.getLocation().add(dir,rc.getType().strideRadius).distanceTo(b.getLocation()) <= rc.getType().bodyRadius)
+              return false;
+          }
           rc.move(dir);
+          return true;
+        }
+        return false;
+      case FIRE:
+        if(rc.canFireSingleShot())
+        {
+          rc.fireSingleShot(dir);
           return true;
         }
         return false;
