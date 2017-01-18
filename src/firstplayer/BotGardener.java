@@ -12,7 +12,13 @@ public strictfp class BotGardener extends Bot {
   public final static int INITIAL_MOVES = 30;
   public static int trees=0;
   public static int[] myTrees;
+  public final static float LUMBERJACK_BUILD_RATIO=3;
+  public final static float SCOUT_BUILD_RATIO=3;
+  public final static float SOLDIER_BUILD_RATIO=2;
+  public final static float SUM_BUILD_RATIO = LUMBERJACK_BUILD_RATIO+SCOUT_BUILD_RATIO+SOLDIER_BUILD_RATIO;
 
+  public final static float LUMBERJACK_THRESHOLD = LUMBERJACK_BUILD_RATIO/SUM_BUILD_RATIO;
+  public final static float SCOUT_BUILD_THRESHOLD = (SCOUT_BUILD_RATIO+LUMBERJACK_BUILD_RATIO)/SUM_BUILD_RATIO;
 
   public static void loop(RobotController rc_) {
     System.out.println("I'm a Gardener!");
@@ -66,15 +72,16 @@ public strictfp class BotGardener extends Bot {
 
       boolean canBuild = true;
       // Randomly attempt to build a soldier or lumberjack in this direction
-      if(rc.isBuildReady()) {
-        if (Math.random() < .001 * rc.getTeamBullets()) {
-          tryAction(ActionType.BUILD_SCOUT, dir, 15,6);
-  //    } else if (Math.random() < .001*rc.getTeamBullets()) {
-  //      rc.buildRobot(RobotType.LUMBERJACK, dir);
-        } else if (Math.random() < .002 * rc.getTeamBullets()) {
+
+
+      if(rc.isBuildReady() && Math.random()<0.008*rc.getTeamBullets()) {
+        double randomNum = Math.random();
+        if (randomNum < LUMBERJACK_THRESHOLD) {
+          tryAction(ActionType.BUILD_LUMBERJACK, dir, 15,6);
+        } else if (randomNum < SCOUT_BUILD_THRESHOLD) {
+          tryAction(ActionType.BUILD_SCOUT, dir, 15, 6);
+        } else {
           tryAction(ActionType.BUILD_SOLDIER, dir, 15, 6);
-        } else if (Math.random() < .001 * rc.getTeamBullets()) {
-          tryAction(ActionType.BUILD_LUMBERJACK, dir, 15, 6);
         }
       }
 

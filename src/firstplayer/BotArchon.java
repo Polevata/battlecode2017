@@ -40,11 +40,6 @@ public strictfp class BotArchon extends Bot {
 
     // Randomly attempt to build a gardener in this direction
     if (plant && rc.isBuildReady() && (rc.getRobotCount()-rc.readBroadcast(Broadcasting.ARCHON_NUMBER)-rc.readBroadcast(Broadcasting.GARDENER_NUMBER)>rc.getTreeCount() || Math.random()<0.01*rc.getTeamBullets()) ){
-        System.out.println("comparison");
-        System.out.println(rc.readBroadcast(Broadcasting.ARCHON_NUMBER));
-        System.out.println(rc.readBroadcast(Broadcasting.GARDENER_NUMBER));
-        System.out.println(rc.getTreeCount());
-
         tryAction(Actions.ActionType.BUILD_GARDENER, BotGardener.awayFromArchons(), 15, 8);
     }
 

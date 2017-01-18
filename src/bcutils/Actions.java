@@ -44,6 +44,8 @@ public class Actions{
 
         if(rc.canBuildRobot(buildType, dir)) {
           rc.buildRobot(buildType, dir);
+          System.out.println(action);
+          System.out.println(buildType);
           return true;
         }
         return false;
