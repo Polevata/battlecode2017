@@ -61,10 +61,10 @@ public strictfp class Bot {
   }
 
   /**
-   * Attempts to move in a given direction, while avoiding small obstacles directly in the path.
+   * Attempts to do an action in a direction
    *
-   * @param dir The intended direction of movement
-   * @return true if a move was performed
+   * @param dir The intended direction of action
+   * @return true if an action was performed
    * @throws GameActionException
    */
 
@@ -78,26 +78,34 @@ public strictfp class Bot {
   }
 
   /**
-   * Attempts to move in a given direction, while avoiding small obstacles direction in the path.
+   * Attempts to do an action in a general direction, starting in the exact direction and trying nearby directions if the exact direction fails
    *
-   * @param dir The intended direction of movement
+   * @param dir The intended direction of action
    * @param degreeOffset Spacing between checked directions (degrees)
    * @param checksPerSide Number of extra directions checked on each side, if intended direction was unavailable
-   * @return true if a move was performed
+   * @return true if an action was performed
    * @throws GameActionException
    */
 
   static boolean tryAction(ActionType action, Direction dir, float degreeOffset, int checksPerSide) throws GameActionException {
 
+
+    if( (action==ActionType.MOVE && rc.hasMoved()) || (action==ActionType.FIRE && rc.hasAttacked()) ){
+      return false;
+    }
+
     BulletInfo[] walkableBullets = rc.senseNearbyBullets(myType.strideRadius + myType.bodyRadius); //We need to have something like this to prevent walking into bullets
     // First, try intended direction
 
-    System.out.println("ACTION DISPATCH:");
-    System.out.println(action);
+    if(RobotPlayer.DEBUGGING) {
+      System.out.println("ACTION DISPATCH:");
+      System.out.println(action);
+    }
 
     if (Actions.dispatchAction(rc, action, dir)) {
       return true;
     }
+
     // Now try a bunch of similar angles
     boolean moved = false;
     int currentCheck = 1;
