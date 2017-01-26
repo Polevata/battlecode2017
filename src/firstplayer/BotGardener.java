@@ -5,6 +5,7 @@ import bcutils.Actions.*;
 import bcutils.Broadcasting;
 
 import javax.sound.midi.SysexMessage;
+import java.awt.*;
 
 public strictfp class BotGardener extends Bot {
 
@@ -55,33 +56,41 @@ public strictfp class BotGardener extends Bot {
     if(roundNum-roundNumBirth < INITIAL_MOVES) {
       Direction dir = approxAwayFromArchons(4);
       tryAction(ActionType.MOVE, dir, 10, 9);
-      if(rc.readBroadcast(Broadcasting.SOLDIER_NUMBER)+rc.readBroadcast(Broadcasting.SCOUT_NUMBER)<rc.readBroadcast(Broadcasting.GARDENER_NUMBER)){
-        tryAction(ActionType.BUILD_SCOUT, dir, 10, 12);
+      if (rc.isBuildReady()) {
+        if (nearbyEnemies.length > 0) {
+          tryAction(ActionType.BUILD_SOLDIER, dir, 10, 12);
+        } else if (rc.readBroadcast(Broadcasting.SOLDIER_NUMBER) + rc.readBroadcast(Broadcasting.SCOUT_NUMBER) < rc.readBroadcast(Broadcasting.GARDENER_NUMBER)) {
+          tryAction(ActionType.BUILD_SCOUT, dir, 10, 12);
+        }
       }
     }
+
     else {
       Direction dir = randomDirection();
-      TreeInfo[] adjacentTrees = rc.senseNearbyTrees(2);
-      TreeInfo[] nearbyTrees = rc.senseNearbyTrees(RobotType.GARDENER.bodyRadius+RobotType.GARDENER.strideRadius);
-
+      TreeInfo[] adjacentTrees = rc.senseNearbyTrees(RobotType.GARDENER.bodyRadius+GameConstants.INTERACTION_DIST_FROM_EDGE);
 
       // take care of weakest tree in surroundings
-      int patient = weakestTree(nearbyTrees);
+      int patient = weakestTree(adjacentTrees);
       if (patient!=-1) rc.water(patient);
 
+      Boolean danger = nearbyEnemies.length>0;
+
+      if(danger && rc.getTeamBullets()>RobotType.SCOUT.bulletCost){
+        tryAction(ActionType.BUILD_SCOUT, dir, 10, 12);
+      }
+
       // if there aren't enough trees around, plant one
-      if (plant && adjacentTrees.length < DENSITY && rc.canPlantTree(dir)) {
+      if (!danger && plant && adjacentTrees.length < DENSITY && rc.canPlantTree(dir)) {
         tryAction(ActionType.PLANT, awayFromArchons().opposite(), 15, 6);
       }
 
       // Randomly attempt to build a soldier, scout or lumberjack around the gardener.
       // Likelihood to build each based on ratio at top.
 
-
-      if(rc.isBuildReady() && Math.random()<0.008*rc.getTeamBullets()) {
+      if(!danger && rc.isBuildReady() && Math.random()<0.008*rc.getTeamBullets()) {
         double randomNum = Math.random();
         if (randomNum < LUMBERJACK_THRESHOLD) {
-          tryAction(ActionType.BUILD_LUMBERJACK, dir, 15,6);
+          tryAction(ActionType.BUILD_LUMBERJACK, dir, 15, 6);
         } else if (randomNum < SCOUT_BUILD_THRESHOLD) {
           tryAction(ActionType.BUILD_SCOUT, dir, 15, 6);
         } else {
@@ -137,7 +146,6 @@ public strictfp class BotGardener extends Bot {
     float netY=0;
 
     RobotInfo[] nearbyRobots = rc.senseNearbyRobots(RobotType.GARDENER.sensorRadius, us);
-
     for (RobotInfo sensedRobot : nearbyRobots) {
       robotType = sensedRobot.getType();
       if (robotType == RobotType.ARCHON || robotType == RobotType.GARDENER) {
