@@ -38,11 +38,9 @@ public strictfp class Bot {
     health = rc.getHealth();
     reportAlive = true;
     random = new Random(myID);
-
     nearbyFriends = rc.senseNearbyRobots(-1, us);
     nearbyEnemies = rc.senseNearbyRobots(-1, them);
     nearbyTrees = rc.senseNearbyTrees();
-
     here = rc.getLocation();
     roundNum = rc.getRoundNum();
     roundNumBirth = roundNum;
@@ -61,8 +59,11 @@ public strictfp class Bot {
     if(reportAlive && health < 10) {
       Broadcasting.decrementRobotType(rc, myType);
     }
-    if (rc.getTeamBullets() >= 10000 && !RobotPlayer.DEBUGGING)
-      rc.donate(10000);
+    float bulletsLeft = GameConstants.VICTORY_POINTS_TO_WIN - rc.getTeamVictoryPoints()*(GameConstants.VP_BASE_COST + roundNum*GameConstants.VP_INCREASE_PER_ROUND);
+    if (rc.getTeamBullets() >= bulletsLeft && !RobotPlayer.DEBUGGING)
+      rc.donate(bulletsLeft);
+    if (rc.readBroadcast(Broadcasting.GARDENER_NUMBER) + rc.readBroadcast(Broadcasting.ARCHON_NUMBER) == 0)
+      rc.donate(rc.getTeamBullets());
   }
   public static Direction randomDirection() {
     return new Direction(random.nextFloat() * 2 * (float) Math.PI);
