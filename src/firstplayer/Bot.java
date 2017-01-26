@@ -23,6 +23,9 @@ public strictfp class Bot {
   public static float health;
   public static int roundNum;
   public static int roundNumBirth;
+  public static RobotInfo[] nearbyFriends;
+  public static RobotInfo[] nearbyEnemies;
+  public static TreeInfo[] nearbyTrees;
 
   public static boolean plant = true;
   
@@ -36,8 +39,9 @@ public strictfp class Bot {
     reportAlive = true;
     random = new Random(myID);
 
-    RobotInfo[] nearbyBots = rc.senseNearbyRobots();
-    TreeInfo[] nearbyTrees = rc.senseNearbyTrees();
+    nearbyFriends = rc.senseNearbyRobots(-1, us);
+    nearbyEnemies = rc.senseNearbyRobots(-1, them);
+    nearbyTrees = rc.senseNearbyTrees();
 
     here = rc.getLocation();
     roundNum = rc.getRoundNum();
@@ -50,6 +54,10 @@ public strictfp class Bot {
     here = rc.getLocation();
     roundNum = rc.getRoundNum();
     health = rc.getHealth();
+    nearbyFriends = rc.senseNearbyRobots(-1, us);
+    nearbyEnemies = rc.senseNearbyRobots(-1, them);
+    nearbyTrees = rc.senseNearbyTrees();
+
     if(reportAlive && health < 10) {
       Broadcasting.decrementRobotType(rc, myType);
     }
@@ -97,7 +105,9 @@ public strictfp class Bot {
     BulletInfo[] walkableBullets = rc.senseNearbyBullets(myType.strideRadius + myType.bodyRadius); //We need to have something like this to prevent walking into bullets
     // First, try intended direction
 
+
     if(RobotPlayer.DEBUGGING) {
+      System.out.println(RobotPlayer.DEBUGGING);
       System.out.println("ACTION DISPATCH:");
       System.out.println(action);
     }

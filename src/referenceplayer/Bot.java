@@ -91,9 +91,10 @@ public strictfp class Bot {
     BulletInfo[] walkableBullets = rc.senseNearbyBullets(myType.strideRadius + myType.bodyRadius); //We need to have something like this to prevent walking into bullets
     // First, try intended direction
 
-    System.out.println("ACTION DISPATCH:");
-    System.out.println(action);
-
+    if(RobotPlayer.DEBUGGING) {
+      System.out.println("ACTION DISPATCH:");
+      System.out.println(action);
+    }
     if (Actions.dispatchAction(rc, action, dir)) {
       return true;
     }

@@ -38,7 +38,7 @@ public class Actions{
         }
         return false;
       default:
-        RobotType buildType = RobotType.SCOUT;
+        RobotType buildType = null;
 
         switch(action){
           case BUILD_GARDENER:
@@ -53,12 +53,16 @@ public class Actions{
           case BUILD_TANK:
             buildType = RobotType.TANK;
             break;
+          case BUILD_SCOUT:
+            buildType = RobotType.SCOUT;
+            break;
+          default:
+            System.out.println("UNKNOWN ActionType");
+            System.out.println(action);
         }
 
-        if(rc.canBuildRobot(buildType, dir)) {
+        if(buildType!=null && rc.canBuildRobot(buildType, dir)) {
           rc.buildRobot(buildType, dir);
-          System.out.println(action);
-          System.out.println(buildType);
           return true;
         }
         return false;
