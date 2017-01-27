@@ -114,14 +114,14 @@ public strictfp class BotScout extends Bot {
   }
 
     static void harass() throws GameActionException {
-        RobotInfo[] robots = rc.senseNearbyRobots(-1, them);
 
         // If there are some...
-        if (robots.length > 0) {
+        if (nearbyEnemies.length > 0) {
             // And we have enough bullets, and haven't attacked yet this turn...
-            if (rc.canFireSingleShot()) {
+            if (rc.canFireSingleShot() )//&& random.nextFloat()*(rc.getType().sensorRadius-rc.getLocation().distanceTo(nearbyEnemies[0].getLocation())) > (rc.getType().bodyRadius*2))
+            {
                 // ...Then fire a bullet in the direction of the enemy.
-                rc.fireSingleShot(rc.getLocation().directionTo(robots[0].location));
+                rc.fireSingleShot(rc.getLocation().directionTo(nearbyEnemies[0].location));
             }
         }
     }
