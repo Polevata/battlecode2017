@@ -45,8 +45,11 @@ public strictfp class BotArchon extends Bot {
     }
 
     // Randomly attempt to build a gardener in this direction
+    //System.out.println("DANGER BUILD ROUND");
+    //System.out.println(rc.readBroadcast(Broadcasting.DANGER_BUILD_ROUND));
+    //System.out.println(roundNum);
     if (plant && rc.isBuildReady() && (roundNum-rc.readBroadcast(Broadcasting.DANGER_BUILD_ROUND)) > 1 && (rc.getRobotCount()-rc.readBroadcast(Broadcasting.ARCHON_NUMBER)-rc.readBroadcast(Broadcasting.GARDENER_NUMBER)>rc.getTreeCount() || Math.random()<0.01*rc.getTeamBullets())){
-        tryAction(Actions.ActionType.BUILD_GARDENER, BotGardener.awayFromArchons(), 15, 8);
+        tryAction(Actions.ActionType.BUILD_GARDENER, BotGardener.approxAwayFromArchons(5));
     }
 
     // Evade bullets but don't move otherwise (too likely to get entrapped in enemy team)

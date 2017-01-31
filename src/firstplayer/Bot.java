@@ -46,7 +46,7 @@ public strictfp class Bot {
     wasInDanger = false;
     if (nearbyEnemies.length > 0) {
       inDanger = true;
-      if (nearbyEnemies.length > 2) {
+      if (nearbyEnemies.length > 1) {
         inHighDanger = true;
       }
     } else {
@@ -105,7 +105,7 @@ public strictfp class Bot {
    */
 
   static boolean tryAction(ActionType action, Direction dir) throws GameActionException {
-    return tryAction(action, dir,20,3);
+    return tryAction(action, dir,10,17);
   }
 
   static boolean tryAction(ActionType action, MapLocation ml) throws GameActionException
@@ -120,6 +120,7 @@ public strictfp class Bot {
   static boolean canAction(ActionType action, Direction dir, float degreeOffset, int checksPerSide) throws  GameActionException {
     return tryAction(action, dir, degreeOffset, checksPerSide, false);
   }
+
 
   /**
    * Attempts to do an action in a general direction, starting in the exact direction and trying nearby directions if the exact direction fails
@@ -209,8 +210,8 @@ public strictfp class Bot {
       b = nearbyBullets[i];
       if (willCollideWithMe(b)) {
         noDangerousBullet = false;
-        netX += b.dir.getDeltaX(1) / Math.pow(b.getLocation().distanceTo(here),2);
-        netY += b.dir.getDeltaY(1) / Math.pow(b.getLocation().distanceTo(here),2);
+        netX += b.dir.getDeltaX(1) / Math.pow(b.getLocation().distanceTo(here), 2);
+        netY += b.dir.getDeltaY(1) / Math.pow(b.getLocation().distanceTo(here), 2);
       }
 }
     if (noDangerousBullet) {
@@ -218,7 +219,7 @@ public strictfp class Bot {
       for (RobotInfo r : nearbyBots)
       {
         if (r.getType() == RobotType.LUMBERJACK && r.getLocation().distanceTo(here) < RobotType.LUMBERJACK.bodyRadius + GameConstants.LUMBERJACK_STRIKE_RADIUS*5)
-          return tryAction(ActionType.MOVE, r.getLocation().directionTo(here),30,3);
+          return tryAction(ActionType.MOVE, r.getLocation());
       }
       return false;
     }

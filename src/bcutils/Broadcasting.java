@@ -106,18 +106,18 @@ public strictfp class Broadcasting {
       }
     }
 
-    System.out.println("REPORT DISTRESS");
-    System.out.println(robotNumber);
-    System.out.println(numBots);
+    //System.out.println("REPORT DISTRESS");
+    //System.out.println(robotNumber);
+    //System.out.println(numBots);
 
     if (robotNumber == -1)
     {
-      System.out.println("This gardener is new or was presumed dead");
+      //System.out.println("This gardener is new or was presumed dead");
       if (numBots != 20)
         rc.broadcast(ROBOT_NUMBER,numBots+1);
       if (firstZero != -1)
       {
-        System.out.println("This gardener will fill a slot that was unoccupied");
+        //System.out.println("This gardener will fill a slot that was unoccupied");
         robotNumber = firstZero;
       }
       else
@@ -125,12 +125,12 @@ public strictfp class Broadcasting {
         if (numBots < 20)
         {
           robotNumber = numBots;
-          System.out.println("This gardener is new and will be added at the end");
+          //System.out.println("This gardener is new and will be added at the end");
         }
         else
         {
           robotNumber = oldest;
-          System.out.println("Here comes the 20th gardener!");
+          //System.out.println("Here comes the 20th gardener!");
         }
       }
     }
@@ -139,7 +139,7 @@ public strictfp class Broadcasting {
   }
 
   public static void removeTargetRobot(RobotController rc, int robotID, Boolean friendly) throws GameActionException{
-    System.out.println("REMOVE TARGET");
+    //System.out.println("REMOVE TARGET");
     int robotNumber = -1;
     int firstZero = -1;
     int ROBOT1 = GARDENER1;
@@ -177,11 +177,11 @@ public strictfp class Broadcasting {
         }
       }
     }
-    System.out.println("READ DISTRESS");
-    if(goal.x!=-1) {
-      System.out.println(goal.x);
-      System.out.println(goal.y);
-    }
+    //System.out.println("READ DISTRESS");
+    //if(goal.x!=-1) {
+    //  System.out.println(goal.x);
+    //  System.out.println(goal.y);
+    //}
     return goal;
   }
 

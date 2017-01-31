@@ -37,11 +37,12 @@ public strictfp class BotSoldier extends Bot {
 
     // If there are some...
     if (nearbyEnemies.length > 0) {
-      Direction dir = here.directionTo(nearbyEnemies[0].location);
+      MapLocation enemyLoc = nearbyEnemies[0].location;
+      Direction dir = here.directionTo(enemyLoc);
       // And we have enough bullets, and haven't attacked yet this turn...
       // ...Then fire a bullet in the direction of the enemy.
       if (rc.canFireSingleShot()) {
-        float distance = nearbyEnemies[0].getLocation().distanceTo(here);
+        float distance = enemyLoc.distanceTo(here);
         if (distance < 3 && rc.canFireTriadShot()) {
           rc.fireTriadShot(dir);
         } else if (distance < 3.5) {
@@ -50,22 +51,22 @@ public strictfp class BotSoldier extends Bot {
       }
       // Move towards the enemy
       evade();
-      tryAction(ActionType.MOVE, dir, 6, 15);
+      tryAction(ActionType.MOVE, dir);
     } else {
       MapLocation distress = Broadcasting.closestDistress(rc);
       if (distress.x != -1) {
-        tryAction(ActionType.MOVE, here.directionTo(distress), 6, 14);
+        tryAction(ActionType.MOVE, distress);
       } else if (nearbyFriends.length > 0) {
         for (RobotInfo friend : nearbyFriends) {
           if ((friend.getType() == RobotType.GARDENER || friend.getType() == RobotType.ARCHON) && here.distanceTo(friend.getLocation()) < protectDistance) {
-            tryAction(ActionType.MOVE, here.directionTo(friend.getLocation()), 6, 10);
+            tryAction(ActionType.MOVE, here.directionTo(friend.getLocation()));
           }
         }
       }
     }
 
     if (!rc.hasMoved()) {
-      tryAction(ActionType.MOVE, randomDirection(), 10, 17);
+      tryAction(ActionType.MOVE, randomDirection());
     }
   }
 }
