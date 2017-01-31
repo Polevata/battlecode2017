@@ -65,6 +65,8 @@ public strictfp class BotGardener extends Bot {
       if (rc.getTeamBullets() >= RobotType.SOLDIER.bulletCost) {
         tryAction(ActionType.BUILD_SOLDIER, nearbyEnemies[0].getLocation());
         //System.out.println("DANGER BUILD");
+      } else if ( myHealth+(myHealth - previousHealth)*2 < 0 && rc.getTeamBullets() >= RobotType.SCOUT.bulletCost) {
+        tryAction(ActionType.BUILD_SCOUT, nearbyEnemies[0].getLocation());
       } else {
         rc.broadcast(Broadcasting.DANGER_BUILD_ROUND, roundNum);
         //System.out.println("REPORT DANGER ROUND");
