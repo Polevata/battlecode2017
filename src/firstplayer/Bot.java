@@ -84,7 +84,7 @@ public strictfp class Bot {
       inDanger = false;
       inHighDanger = false;
     }
-    float bulletsLeft = GameConstants.VICTORY_POINTS_TO_WIN - rc.getTeamVictoryPoints()*(GameConstants.VP_BASE_COST + roundNum*GameConstants.VP_INCREASE_PER_ROUND);
+    float bulletsLeft = (GameConstants.VICTORY_POINTS_TO_WIN - rc.getTeamVictoryPoints())*(GameConstants.VP_BASE_COST + roundNum*GameConstants.VP_INCREASE_PER_ROUND);
     if (rc.getTeamBullets() >= bulletsLeft && !RobotPlayer.DEBUGGING)
       rc.donate(bulletsLeft);
     System.out.println("Number of friendly gardeners" + rc.readBroadcast(Broadcasting.GARDENER_NUMBER));
