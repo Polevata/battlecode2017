@@ -15,6 +15,8 @@ public strictfp class BotScout extends Bot {
     private static int[] deathIDs = new int[25];
     private static int[] deathRounds = new int[25];
     private static boolean[] deathIsArchon = new boolean[25];
+    private static boolean respondingToDistress = false;
+    private static int roundRespondedToDistress = 0;
 
   public static void loop(RobotController rc_) {
     System.out.println("I'm a Scout!");
@@ -70,6 +72,16 @@ public strictfp class BotScout extends Bot {
           System.out.println("There are " + numArchons + " Enemy Archons, " + numGardeners + " Enemy Gardeners, and " + numEnemyClumps + " Enemy Clumps");
           if(roundNum %100 == 0)
             System.out.println(numArchons);
+          MapLocation closestDistress = Broadcasting.closestDistress(rc);
+          if (rc.getLocation().distanceTo(closestDistress) < 10 && myID % 2 == 1)
+          {
+              if (!respondingToDistress)
+              {
+                  respondingToDistress = true;
+                  roundRespondedToDistress = roundNum;
+              }
+              tryAction(ActionType.MOVE,hover(closestDistress,roundNum-roundRespondedToDistress));
+          }
           if (numGardeners > 0)
           {
               System.out.println(numGardeners);
