@@ -56,7 +56,8 @@ public strictfp class BotGardener extends Bot {
     //report dangerous situations
     if (inDanger) {
       Broadcasting.updateTargetRobot(rc, rc.getLocation(), roundNum, rc.getID(), true);
-    } else if (wasInDanger) {
+    }
+    else if (wasInDanger) {
       Broadcasting.removeTargetRobot(rc, myID, true);
     }
 
@@ -65,7 +66,11 @@ public strictfp class BotGardener extends Bot {
       if (rc.getTeamBullets() >= RobotType.SOLDIER.bulletCost) {
         tryAction(ActionType.BUILD_SOLDIER, nearbyEnemies[0].getLocation());
         //System.out.println("DANGER BUILD");
-      } else if ( myHealth+(myHealth - previousHealth)*2 < 0 && rc.getTeamBullets() >= RobotType.SCOUT.bulletCost) {
+      }
+      else if (nearbyEnemies.length > 5 && rc.canBuildRobot(RobotType.TANK,here.directionTo(nearbyEnemies[0].getLocation()))) {
+        rc.buildRobot(RobotType.TANK,here.directionTo(nearbyEnemies[0].location));
+      }
+      else if ( myHealth+(myHealth - previousHealth)*2 < 0 && rc.getTeamBullets() >= RobotType.SCOUT.bulletCost) {
         tryAction(ActionType.BUILD_SCOUT, nearbyEnemies[0].getLocation());
       } else {
         rc.broadcast(Broadcasting.DANGER_BUILD_ROUND, roundNum);
