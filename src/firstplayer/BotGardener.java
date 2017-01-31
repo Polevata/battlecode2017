@@ -1,22 +1,34 @@
 package firstplayer;
 
 import battlecode.common.*;
+import bcutils.Actions.*;
 import bcutils.Broadcasting;
-import sun.reflect.generics.tree.Tree;
 
 import javax.sound.midi.SysexMessage;
+import java.awt.*;
 
 public strictfp class BotGardener extends Bot {
 
-  public final static int DENSITY = 4;
-  public final static int INITIAL_MOVES = 15;
+  //ideal number of friendly trees around gardener
+  public final static int DENSITY = 5;
+  //number of rounds to move and do other things before building trees
+  public final static int INITIAL_MOVES = 30;
+
   public static int trees=0;
   public static int[] myTrees;
 
+  //approximate build ratio for robot types
+  public final static float LUMBERJACK_BUILD_RATIO=5;
+  public final static float SCOUT_BUILD_RATIO=7;
+  public final static float SOLDIER_BUILD_RATIO=3;
+  public final static float SUM_BUILD_RATIO=LUMBERJACK_BUILD_RATIO+SCOUT_BUILD_RATIO+SOLDIER_BUILD_RATIO;
+
+  public static float SCOUT_BUILD_THRESHOLD_ = SCOUT_BUILD_RATIO/SUM_BUILD_RATIO;
+  public static float LUMBERJACK_BUILD_THRESHOLD = (SCOUT_BUILD_RATIO+LUMBERJACK_BUILD_RATIO)/SUM_BUILD_RATIO;
 
   public static void loop(RobotController rc_) {
     System.out.println("I'm a Gardener!");
-    Bot.init(rc_);
+    init(rc_);
     int endTurnRoundNum;
     while (true) {
       try {
@@ -35,49 +47,98 @@ public strictfp class BotGardener extends Bot {
   }
 
   public static void doTurn() throws GameActionException {
-    // Listen for home archon's location
-    int xPos = rc.readBroadcast(0);
-    int yPos = rc.readBroadcast(1);
-    MapLocation archonLoc = new MapLocation(xPos,yPos);
 
-    // Generate a random direction
+    //Generate a random direction
     //Direction dir = randomDirection();
 
+    BotScout.tryShake();
 
-    if(roundNum-roundNumBirth < INITIAL_MOVES && rc.getTreeCount()<rc.getRobotCount()) {
-      tryMove(approxAwayFromArchons(2), (float)Math.PI/15, 10);
+    //report dangerous situations
+    if (inDanger) {
+      Broadcasting.updateTargetRobot(rc, rc.getLocation(), roundNum, rc.getID(), true);
+    } else if (wasInDanger) {
+      Broadcasting.removeTargetRobot(rc, myID, true);
     }
+
+    //build more soldiers if environment is very dangerous
+    if (rc.isBuildReady() && inHighDanger) {
+      if (rc.getTeamBullets() >= RobotType.SOLDIER.bulletCost) {
+        tryAction(ActionType.BUILD_SOLDIER, nearbyEnemies[0].getLocation());
+        //System.out.println("DANGER BUILD");
+      } else if ( myHealth+(myHealth - previousHealth)*2 < 0 && rc.getTeamBullets() >= RobotType.SCOUT.bulletCost) {
+        tryAction(ActionType.BUILD_SCOUT, nearbyEnemies[0].getLocation());
+      } else {
+        rc.broadcast(Broadcasting.DANGER_BUILD_ROUND, roundNum);
+        //System.out.println("REPORT DANGER ROUND");
+      }
+    }
+
+    // initial moves away from archon and other gardeners when this gardener was just built.
+    // Also produces a scout if there aren't enough scouts
+    if (roundNum-roundNumBirth < INITIAL_MOVES) {
+      Direction dir = approxAwayFromArchons(4);
+      tryAction(ActionType.MOVE, dir);
+      if (!inHighDanger && rc.isBuildReady() && rc.readBroadcast(Broadcasting.SOLDIER_NUMBER) + rc.readBroadcast(Broadcasting.SCOUT_NUMBER) < rc.readBroadcast(Broadcasting.GARDENER_NUMBER)) {
+          tryAction(ActionType.BUILD_SCOUT, dir);
+      }
+    }
+
     else {
       Direction dir = randomDirection();
-      TreeInfo[] adjacentTrees = rc.senseNearbyTrees(2);
-      TreeInfo[] nearbyTrees = rc.senseNearbyTrees();
+      TreeInfo[] adjacentTrees = rc.senseNearbyTrees(RobotType.GARDENER.bodyRadius + GameConstants.INTERACTION_DIST_FROM_EDGE);
 
-      int tree = weakestTree(nearbyTrees);
-      if (tree!=-1) rc.water(tree);
-
-      if (plant && adjacentTrees.length < DENSITY && (rc.getTreeCount() < rc.getRobotCount()) && rc.canPlantTree(dir)) {
-        rc.plantTree(dir);
+      // take care of weakest tree in surroundings
+      int patient = weakestTree(adjacentTrees);
+      if (patient != -1) {
+        rc.water(patient);
+        //System.out.println("WATER_TREE");
+        //System.out.println(patient);
+      } else {
+        //System.out.println("CANT_WATER");
+        //System.out.println(patient);
       }
 
-      // Randomly attempt to build a soldier or lumberjack in this direction
-      else if (rc.canBuildRobot(RobotType.SCOUT, dir) && Math.random() < .001 * rc.getTeamBullets()) {
-        rc.buildRobot(RobotType.SCOUT, dir);
-//    } else if (rc.canBuildRobot(RobotType.LUMBERJACK, dir) && Math.random() < .01 && rc.isBuildReady()) {
-//      rc.buildRobot(RobotType.LUMBERJACK, dir);
-      } else if (rc.canBuildRobot(RobotType.SOLDIER, dir) && Math.random() < .001 * rc.getTeamBullets()) {
-        rc.buildRobot(RobotType.SOLDIER, dir);
-      } else if (rc.canBuildRobot(RobotType.LUMBERJACK, dir) && Math.random() < .001 * rc.getTeamBullets()) {
-        rc.buildRobot(RobotType.LUMBERJACK, dir);
+      if (!inHighDanger && rc.isBuildReady()) {
+          // if there aren't enough trees around, plant one
+          if (plant && adjacentTrees.length < DENSITY && rc.canPlantTree(dir)) {
+            tryAction(ActionType.PLANT, awayFromArchons().opposite());
+          }
+
+          // Randomly attempt to build a soldier, scout or lumberjack around the gardener.
+          // Likelihood to build each based on ratio at top.
+
+          if (Math.random() < 0.008 * rc.getTeamBullets()) {
+            //build scout if that is all we can afford
+            if (rc.getTeamBullets() < RobotType.SOLDIER.bulletCost) {
+              tryAction(ActionType.BUILD_SCOUT, dir);
+            } else {
+              //build robots according to build ratio
+              double randomNum = Math.random();
+              if (randomNum < SCOUT_BUILD_THRESHOLD_) {
+                tryAction(ActionType.BUILD_SCOUT, dir);
+              } else if (randomNum < LUMBERJACK_BUILD_THRESHOLD) {
+                tryAction(ActionType.BUILD_LUMBERJACK, dir);
+              } else {
+                tryAction(ActionType.BUILD_SOLDIER, dir);
+              }
+            }
+          }
+        }
       }
       // Move randomly
       //if (!evade() && adjacentTrees.length < DENSITY) tryMove(randomDirection());
-    }
   }
 
-
+  /**
+   * Returns weakest tree from array of trees
+   *
+   * @param trees - trees to consider
+   * @return tree ID for weakest (lowest health tree among trees considered)
+   * @throws GameActionException
+   */
   static int weakestTree(TreeInfo[] trees) throws GameActionException {
     try {
-      int weakestTree = -1;
+      int patient = -1;
       float minHealth = Float.POSITIVE_INFINITY;
       float health;
 
@@ -85,15 +146,24 @@ public strictfp class BotGardener extends Bot {
         health = tree.getHealth();
         if(tree.getTeam()==us && health < minHealth) {
           minHealth = health;
-          weakestTree = tree.getID();
+          patient = tree.getID();
         }
       }
-    return weakestTree;
+    return patient;
     } catch (Exception e) {
       System.out.println("Weakest Tree Exception");
       return -1;
     }
   }
+
+  /**
+   * Finds a direction away from nearby archons and gardeners.
+   * Archon force proportional to distance^2.
+   * Gardener force proportional to distance.
+   *
+   * @return Direction away from archons and gardeners resulting from sum of forces
+   * @throws GameActionException
+   */
   static Direction awayFromArchons() throws GameActionException {
     Direction robotDirection;
     float robotDistance;
@@ -102,14 +172,12 @@ public strictfp class BotGardener extends Bot {
     float netY=0;
 
     RobotInfo[] nearbyRobots = rc.senseNearbyRobots(RobotType.GARDENER.sensorRadius, us);
-
     for (RobotInfo sensedRobot : nearbyRobots) {
       robotType = sensedRobot.getType();
       if (robotType == RobotType.ARCHON || robotType == RobotType.GARDENER) {
         robotDirection = sensedRobot.getLocation().directionTo(here);
-        System.out.println(robotDirection);
         if (robotType == RobotType.ARCHON)
-          robotDistance = here.distanceSquaredTo(sensedRobot.getLocation())/2;
+          robotDistance = here.distanceSquaredTo(sensedRobot.getLocation())/5;
         else
           robotDistance = here.distanceTo(sensedRobot.getLocation());
         netX += robotDirection.getDeltaX(1) / robotDistance;
@@ -119,6 +187,14 @@ public strictfp class BotGardener extends Bot {
     return new Direction(netX, netY);
   }
 
+  /**
+   * Approximate direction away from nearby archons and gardeners
+   * Uses awayFromArchons weighted by ratio for vector and adds some randomness with unit distance weight to create new direction
+   *
+   * @param ratio ratio to weight awayFromArchons direction by
+   * @return approximate Direction away from archons and gardeners
+   * @throws GameActionException
+   */
   static Direction approxAwayFromArchons(int ratio) throws GameActionException{
     Direction away = awayFromArchons();
     float x = away.getDeltaX(ratio);

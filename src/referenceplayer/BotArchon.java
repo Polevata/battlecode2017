@@ -1,7 +1,11 @@
-package firstplayer;
+package referenceplayer;
 
-import battlecode.common.*;
-import bcutils.*;
+import battlecode.common.Clock;
+import battlecode.common.GameActionException;
+import battlecode.common.MapLocation;
+import battlecode.common.RobotController;
+import bcutils.Actions;
+import bcutils.Broadcasting;
 
 public strictfp class BotArchon extends Bot {
   public static void loop(RobotController rc_) throws GameActionException {
@@ -36,20 +40,11 @@ public strictfp class BotArchon extends Bot {
     // Generate a random direction
     //Direction dir = Utils.randomDirection();
 
-    BotScout.tryShake();
 
-    if(inDanger){
-      Broadcasting.updateTargetRobot(rc, here, roundNum, myID, true);
-    } else if (wasInDanger) {
-      Broadcasting.removeTargetRobot(rc, myID, true);
-    }
 
     // Randomly attempt to build a gardener in this direction
-    //System.out.println("DANGER BUILD ROUND");
-    //System.out.println(rc.readBroadcast(Broadcasting.DANGER_BUILD_ROUND));
-    //System.out.println(roundNum);
-    if (plant && rc.isBuildReady() && (roundNum-rc.readBroadcast(Broadcasting.DANGER_BUILD_ROUND)) > 1 && (rc.getRobotCount()-rc.readBroadcast(Broadcasting.ARCHON_NUMBER)-rc.readBroadcast(Broadcasting.GARDENER_NUMBER)>rc.getTreeCount() || Math.random()<0.01*rc.getTeamBullets())){
-        tryAction(Actions.ActionType.BUILD_GARDENER, BotGardener.approxAwayFromArchons(5));
+    if (plant && rc.isBuildReady() && (rc.getRobotCount()-rc.readBroadcast(Broadcasting.ARCHON_NUMBER)-rc.readBroadcast(Broadcasting.GARDENER_NUMBER)>rc.getTreeCount() || Math.random()<0.01*rc.getTeamBullets()) ){
+        tryAction(Actions.ActionType.BUILD_GARDENER, BotGardener.awayFromArchons(), 15, 8);
     }
 
     // Evade bullets but don't move otherwise (too likely to get entrapped in enemy team)

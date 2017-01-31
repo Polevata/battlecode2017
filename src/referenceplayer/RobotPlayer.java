@@ -1,6 +1,6 @@
-package firstplayer;
+package referenceplayer;
 
-import battlecode.common.*;
+import battlecode.common.RobotController;
 
 public strictfp class RobotPlayer {
 

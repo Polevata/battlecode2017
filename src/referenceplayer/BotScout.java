@@ -1,7 +1,7 @@
-package firstplayer;
+package referenceplayer;
 
 import battlecode.common.*;
-import bcutils.Actions.*;
+import bcutils.Actions.ActionType;
 import bcutils.Broadcasting;
 
 public strictfp class BotScout extends Bot {
@@ -12,12 +12,10 @@ public strictfp class BotScout extends Bot {
     private static int[] deathIDs = new int[25];
     private static int[] deathRounds = new int[25];
     private static boolean[] deathIsArchon = new boolean[25];
-    private static boolean respondingToDistress = false;
-    private static int roundRespondedToDistress = 0;
 
   public static void loop(RobotController rc_) {
     System.out.println("I'm a Scout!");
-    Bot.init(rc_);
+    init(rc_);
     int endTurnRoundNum;
     while (true) {
       try {
@@ -40,12 +38,12 @@ public strictfp class BotScout extends Bot {
     tryShake();
     harass();
     sendReceiveIntel();
-    bringOutYourDead();
+    reportTheDead();
   }
   
   public static void tryShake() throws GameActionException {
       try {
-          TreeInfo[] neutralTrees = rc.senseNearbyTrees(myType.bodyRadius+1, Team.NEUTRAL);
+          TreeInfo[] neutralTrees = rc.senseNearbyTrees(myType.strideRadius, Team.NEUTRAL);
           for (TreeInfo tree : neutralTrees) {
               if (rc.canShake(tree.ID) && tree.containedBullets > 0) {
                   System.out.printf("Shaking tree %d", tree.ID);
@@ -69,16 +67,6 @@ public strictfp class BotScout extends Bot {
           System.out.println("There are " + numArchons + " Enemy Archons, " + numGardeners + " Enemy Gardeners, and " + numEnemyClumps + " Enemy Clumps");
           if(roundNum %100 == 0)
             System.out.println(numArchons);
-          MapLocation closestDistress = Broadcasting.closestDistress(rc);
-          if (rc.getLocation().distanceTo(closestDistress) < 10 && myID % 2 == 1)
-          {
-              if (!respondingToDistress)
-              {
-                  respondingToDistress = true;
-                  roundRespondedToDistress = roundNum;
-              }
-              tryAction(ActionType.MOVE,hover(closestDistress,roundNum-roundRespondedToDistress));
-          }
           if (numGardeners > 0)
           {
               System.out.println(numGardeners);
@@ -123,14 +111,14 @@ public strictfp class BotScout extends Bot {
   }
 
     static void harass() throws GameActionException {
+        RobotInfo[] robots = rc.senseNearbyRobots(-1, them);
 
         // If there are some...
-        if (nearbyEnemies.length > 0) {
+        if (robots.length > 0) {
             // And we have enough bullets, and haven't attacked yet this turn...
-            if (rc.canFireSingleShot() && random.nextFloat()*(rc.getType().sensorRadius-rc.getLocation().distanceTo(nearbyEnemies[0].getLocation())) > (nearbyEnemies[0].getType().bodyRadius*2))
-            {
+            if (rc.canFireSingleShot()) {
                 // ...Then fire a bullet in the direction of the enemy.
-                rc.fireSingleShot(rc.getLocation().directionTo(nearbyEnemies[0].location));
+                rc.fireSingleShot(rc.getLocation().directionTo(robots[0].location));
             }
         }
     }
@@ -155,7 +143,7 @@ public strictfp class BotScout extends Bot {
                         Broadcasting.broadcastLocation(rc,currentGardenerIndex,robot.getLocation(), roundNum, robot.ID);
                       else
                       {
-                          currentGardenerIndex = Broadcasting.updateTargetRobot(rc,robot.getLocation(),roundNum,robot.ID, false);
+                          currentGardenerIndex = Broadcasting.updateTargetRobot(rc,robot.getLocation(),roundNum,robot.ID,false);
                           currentGardenerID = robot.ID;
                       }
                       if (robot.health < 10) {
@@ -176,6 +164,7 @@ public strictfp class BotScout extends Bot {
           }
       }
     }
+
     static void reportDead(int ID, int round, boolean isArchon)
     {
         boolean foundIt = false;
@@ -201,7 +190,7 @@ public strictfp class BotScout extends Bot {
         }
 
     }
-    static void bringOutYourDead() throws GameActionException
+    static void reportTheDead() throws GameActionException
     {
         for (int i = 0;i<25;i++)
         {

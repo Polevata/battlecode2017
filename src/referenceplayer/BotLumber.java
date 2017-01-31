@@ -1,10 +1,7 @@
-package firstplayer;
+package referenceplayer;
 
 import battlecode.common.*;
-import bcutils.Actions.*;
-import sun.reflect.generics.tree.Tree;
-
-import java.awt.*;
+import bcutils.Actions.ActionType;
 
 public strictfp class BotLumber extends Bot {
   public static TreeInfo[] neutralTrees;
