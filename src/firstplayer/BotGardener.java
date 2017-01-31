@@ -20,11 +20,11 @@ public strictfp class BotGardener extends Bot {
   //approximate build ratio for robot types
   public final static float LUMBERJACK_BUILD_RATIO=3;
   public final static float SCOUT_BUILD_RATIO=3;
-  public final static float SOLDIER_BUILD_RATIO=2;
+  public final static float SOLDIER_BUILD_RATIO=20;
+  public final static float SUM_BUILD_RATIO=LUMBERJACK_BUILD_RATIO+SCOUT_BUILD_RATIO+SOLDIER_BUILD_RATIO;
 
-  public final static float SUM_BUILD_RATIO = LUMBERJACK_BUILD_RATIO+SCOUT_BUILD_RATIO+SOLDIER_BUILD_RATIO;
-  public final static float LUMBERJACK_THRESHOLD = LUMBERJACK_BUILD_RATIO/SUM_BUILD_RATIO;
-  public final static float SCOUT_BUILD_THRESHOLD = (SCOUT_BUILD_RATIO+LUMBERJACK_BUILD_RATIO)/SUM_BUILD_RATIO;
+  public static float SCOUT_BUILD_THRESHOLD_ = SCOUT_BUILD_RATIO/SUM_BUILD_RATIO;
+  public static float LUMBERJACK_BUILD_THRESHOLD = (SCOUT_BUILD_RATIO+LUMBERJACK_BUILD_RATIO)/SUM_BUILD_RATIO;
 
   public static void loop(RobotController rc_) {
     System.out.println("I'm a Gardener!");
@@ -51,17 +51,31 @@ public strictfp class BotGardener extends Bot {
     //Generate a random direction
     //Direction dir = randomDirection();
 
+    BotScout.tryShake();
+
+    //report dangerous situations
+    if (inDanger) {
+      Broadcasting.updateTargetRobot(rc, rc.getLocation(), roundNum, rc.getID(), true);
+    } else if (wasInDanger) {
+      Broadcasting.removeTargetRobot(rc, myID, true);
+    }
+
+    //build more soldiers if environment is very dangerous
+    if (rc.isBuildReady() && inHighDanger) {
+      if (rc.getTeamBullets() >= RobotType.SOLDIER.bulletCost) {
+        tryAction(ActionType.BUILD_SOLDIER, here.directionTo(nearbyEnemies[0].getLocation()), 10, 12);
+      } else {
+        rc.broadcast(Broadcasting.DANGER_BUILD_ROUND, roundNum);
+      }
+    }
+
     // initial moves away from archon and other gardeners when this gardener was just built.
     // Also produces a scout if there aren't enough scouts
-    if(roundNum-roundNumBirth < INITIAL_MOVES) {
+    if (roundNum-roundNumBirth < INITIAL_MOVES) {
       Direction dir = approxAwayFromArchons(4);
       tryAction(ActionType.MOVE, dir, 10, 9);
-      if (rc.isBuildReady()) {
-        if (nearbyEnemies.length > 0) {
-          tryAction(ActionType.BUILD_SOLDIER, dir, 10, 12);
-        } else if (rc.readBroadcast(Broadcasting.SOLDIER_NUMBER) + rc.readBroadcast(Broadcasting.SCOUT_NUMBER) < rc.readBroadcast(Broadcasting.GARDENER_NUMBER)) {
-          tryAction(ActionType.BUILD_SCOUT, dir, 10, 12);
-        }
+      if (!inHighDanger && rc.isBuildReady() && rc.readBroadcast(Broadcasting.SOLDIER_NUMBER) + rc.readBroadcast(Broadcasting.SCOUT_NUMBER) < rc.readBroadcast(Broadcasting.GARDENER_NUMBER)) {
+          tryAction(ActionType.BUILD_SCOUT, dir, 10, 17);
       }
     }
 
@@ -73,34 +87,35 @@ public strictfp class BotGardener extends Bot {
       int patient = weakestTree(adjacentTrees);
       if (patient!=-1) rc.water(patient);
 
-      Boolean danger = nearbyEnemies.length>0;
+      if (!inHighDanger && rc.isBuildReady()) {
+          // if there aren't enough trees around, plant one
+          if (plant && adjacentTrees.length < DENSITY && rc.canPlantTree(dir)) {
+            tryAction(ActionType.PLANT, awayFromArchons().opposite(), 15, 6);
+          }
 
-      if(danger && rc.getTeamBullets()>RobotType.SCOUT.bulletCost){
-        tryAction(ActionType.BUILD_SCOUT, dir, 10, 12);
-      }
+          // Randomly attempt to build a soldier, scout or lumberjack around the gardener.
+          // Likelihood to build each based on ratio at top.
 
-      // if there aren't enough trees around, plant one
-      if (!danger && plant && adjacentTrees.length < DENSITY && rc.canPlantTree(dir)) {
-        tryAction(ActionType.PLANT, awayFromArchons().opposite(), 15, 6);
-      }
-
-      // Randomly attempt to build a soldier, scout or lumberjack around the gardener.
-      // Likelihood to build each based on ratio at top.
-
-      if(!danger && rc.isBuildReady() && Math.random()<0.008*rc.getTeamBullets()) {
-        double randomNum = Math.random();
-        if (randomNum < LUMBERJACK_THRESHOLD) {
-          tryAction(ActionType.BUILD_LUMBERJACK, dir, 15, 6);
-        } else if (randomNum < SCOUT_BUILD_THRESHOLD) {
-          tryAction(ActionType.BUILD_SCOUT, dir, 15, 6);
-        } else {
-          tryAction(ActionType.BUILD_SOLDIER, dir, 15, 6);
+          if (Math.random() < 0.008 * rc.getTeamBullets()) {
+            //build scout if that is all we can afford
+            if (rc.getTeamBullets() < RobotType.SOLDIER.bulletCost) {
+              tryAction(ActionType.BUILD_SCOUT, dir, 6, 30);
+            } else {
+              //build robots according to build ratio
+              double randomNum = Math.random();
+              if (randomNum < SCOUT_BUILD_THRESHOLD_) {
+                tryAction(ActionType.BUILD_SCOUT, dir, 15, 6);
+              } else if (randomNum < LUMBERJACK_BUILD_THRESHOLD) {
+                tryAction(ActionType.BUILD_LUMBERJACK, dir, 15, 6);
+              } else {
+                tryAction(ActionType.BUILD_SOLDIER, dir, 15, 6);
+              }
+            }
+          }
         }
       }
-
       // Move randomly
       //if (!evade() && adjacentTrees.length < DENSITY) tryMove(randomDirection());
-    }
   }
 
   /**

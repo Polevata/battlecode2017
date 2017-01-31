@@ -48,7 +48,7 @@ public strictfp class BotSoldier extends Bot {
       MapLocation myLocation = rc.getLocation();
       MapLocation enemyLocation = robots[0].getLocation();
       Direction toEnemy = myLocation.directionTo(enemyLocation);
-      Actions.dispatchAction(rc, ActionType.MOVE, toEnemy);
+      Actions.dispatchAction(rc, ActionType.MOVE, toEnemy, true);
     }
   }
 

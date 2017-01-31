@@ -95,7 +95,7 @@ public strictfp class Bot {
       System.out.println("ACTION DISPATCH:");
       System.out.println(action);
     }
-    if (Actions.dispatchAction(rc, action, dir)) {
+    if (Actions.dispatchAction(rc, action, dir, true)) {
       return true;
     }
     // Now try a bunch of similar angles
@@ -104,11 +104,11 @@ public strictfp class Bot {
 
     while(currentCheck<=checksPerSide) {
       // Try the offset of the left side
-      if(Actions.dispatchAction(rc, action, dir.rotateLeftDegrees(degreeOffset*currentCheck))) {
+      if(Actions.dispatchAction(rc, action, dir.rotateLeftDegrees(degreeOffset*currentCheck), true)) {
         return true;
       }
       // Try the offset on the right side
-      if(Actions.dispatchAction(rc, action, dir.rotateRightDegrees(degreeOffset*currentCheck))) {
+      if(Actions.dispatchAction(rc, action, dir.rotateRightDegrees(degreeOffset*currentCheck), true)) {
         return true;
       }
       // No move performed, try slightly further

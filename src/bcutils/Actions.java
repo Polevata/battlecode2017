@@ -10,37 +10,39 @@ public class Actions{
     PLANT, MOVE, FIRE, BUILD_GARDENER, BUILD_SCOUT, BUILD_SOLDIER, BUILD_LUMBERJACK, BUILD_TANK
   }
 
-  public static boolean dispatchAction(RobotController rc, ActionType action, Direction dir) throws GameActionException {
+  public static boolean dispatchAction(RobotController rc, ActionType action, Direction dir, Boolean act) throws GameActionException {
     switch(action) {
       case PLANT:
-        if(rc.canPlantTree(dir)) {
-          rc.plantTree(dir);
+        if (rc.canPlantTree(dir)) {
+          if (act)
+            rc.plantTree(dir);
           return true;
         }
         return false;
       case MOVE:
-        if(rc.canMove(dir)) {
+        if (rc.canMove(dir)) {
           BulletInfo[] walkableBullets = rc.senseNearbyBullets(rc.getType().bodyRadius + rc.getType().strideRadius);
           for (BulletInfo b : walkableBullets)
           {
             if (rc.getLocation().add(dir,rc.getType().strideRadius).distanceTo(b.getLocation()) <= rc.getType().bodyRadius)
               return false;
           }
-          rc.move(dir);
+          if (act)
+            rc.move(dir);
           return true;
         }
         return false;
       case FIRE:
-        if(rc.canFireSingleShot())
-        {
-          rc.fireSingleShot(dir);
+        if (rc.canFireSingleShot()) {
+          if (act)
+            rc.fireSingleShot(dir);
           return true;
         }
         return false;
       default:
         RobotType buildType = null;
 
-        switch(action){
+        switch (action) {
           case BUILD_GARDENER:
             buildType = RobotType.GARDENER;
             break;
@@ -61,8 +63,9 @@ public class Actions{
             System.out.println(action);
         }
 
-        if(buildType!=null && rc.canBuildRobot(buildType, dir)) {
-          rc.buildRobot(buildType, dir);
+        if (buildType!=null && rc.canBuildRobot(buildType, dir)) {
+          if (act)
+            rc.buildRobot(buildType, dir);
           return true;
         }
         return false;

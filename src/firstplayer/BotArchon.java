@@ -36,10 +36,16 @@ public strictfp class BotArchon extends Bot {
     // Generate a random direction
     //Direction dir = Utils.randomDirection();
 
+    BotScout.tryShake();
 
+    if(inDanger){
+      Broadcasting.updateTargetRobot(rc, here, roundNum, myID, true);
+    } else if (wasInDanger) {
+      Broadcasting.removeTargetRobot(rc, myID, true);
+    }
 
     // Randomly attempt to build a gardener in this direction
-    if (plant && rc.isBuildReady() && (rc.getRobotCount()-rc.readBroadcast(Broadcasting.ARCHON_NUMBER)-rc.readBroadcast(Broadcasting.GARDENER_NUMBER)>rc.getTreeCount() || Math.random()<0.01*rc.getTeamBullets()) ){
+    if (plant && rc.isBuildReady() && (roundNum-rc.readBroadcast(Broadcasting.DANGER_BUILD_ROUND)) > 1 && (rc.getRobotCount()-rc.readBroadcast(Broadcasting.ARCHON_NUMBER)-rc.readBroadcast(Broadcasting.GARDENER_NUMBER)>rc.getTreeCount() || Math.random()<0.01*rc.getTeamBullets())){
         tryAction(Actions.ActionType.BUILD_GARDENER, BotGardener.awayFromArchons(), 15, 8);
     }
 

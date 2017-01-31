@@ -11,12 +11,12 @@ import java.util.Random;
 public strictfp class Bot {
   public static RobotController rc;
   public static RobotType myType;
-  public static int myTypeBroadcastNum;
   public static int myID;
   public static Team us;
   public static Team them;
   public static Random random;
   public static boolean reportAlive;
+  public static boolean plant = true;
 
   // static variables that may change each round; modified in update()
   public static MapLocation here;
@@ -26,9 +26,10 @@ public strictfp class Bot {
   public static RobotInfo[] nearbyFriends;
   public static RobotInfo[] nearbyEnemies;
   public static TreeInfo[] nearbyTrees;
+  public static Boolean inDanger;
+  public static Boolean wasInDanger;
+  public static boolean inHighDanger;
 
-  public static boolean plant = true;
-  
   static void init(RobotController rc_) {
     rc = rc_;
     myType = rc.getType();
@@ -41,6 +42,18 @@ public strictfp class Bot {
     nearbyFriends = rc.senseNearbyRobots(-1, us);
     nearbyEnemies = rc.senseNearbyRobots(-1, them);
     nearbyTrees = rc.senseNearbyTrees();
+
+    wasInDanger = false;
+    if (nearbyEnemies.length > 0) {
+      inDanger = true;
+      if (nearbyEnemies.length > 2) {
+        inHighDanger = true;
+      }
+    } else {
+      inDanger = false;
+      inHighDanger = false;
+    }
+
     here = rc.getLocation();
     roundNum = rc.getRoundNum();
     roundNumBirth = roundNum;
@@ -56,8 +69,15 @@ public strictfp class Bot {
     nearbyEnemies = rc.senseNearbyRobots(-1, them);
     nearbyTrees = rc.senseNearbyTrees();
 
-    if(reportAlive && health < 10) {
-      Broadcasting.decrementRobotType(rc, myType);
+    wasInDanger = inDanger;
+    if (nearbyEnemies.length > 0) {
+      inDanger = true;
+      if (nearbyEnemies.length > 1) {
+        inHighDanger = true;
+      }
+    } else {
+      inDanger = false;
+      inHighDanger = false;
     }
     float bulletsLeft = GameConstants.VICTORY_POINTS_TO_WIN - rc.getTeamVictoryPoints()*(GameConstants.VP_BASE_COST + roundNum*GameConstants.VP_INCREASE_PER_ROUND);
     if (rc.getTeamBullets() >= bulletsLeft && !RobotPlayer.DEBUGGING)
@@ -86,6 +106,14 @@ public strictfp class Bot {
     return tryAction(action, rc.getLocation().directionTo(ml));
   }
 
+  static boolean tryAction(ActionType action, Direction dir, float degreeOffset, int checksPerSide) throws  GameActionException {
+    return tryAction(action, dir, degreeOffset, checksPerSide, true);
+  }
+
+  static boolean canAction(ActionType action, Direction dir, float degreeOffset, int checksPerSide) throws  GameActionException {
+    return tryAction(action, dir, degreeOffset, checksPerSide, false);
+  }
+
   /**
    * Attempts to do an action in a general direction, starting in the exact direction and trying nearby directions if the exact direction fails
    *
@@ -96,7 +124,7 @@ public strictfp class Bot {
    * @throws GameActionException
    */
 
-  static boolean tryAction(ActionType action, Direction dir, float degreeOffset, int checksPerSide) throws GameActionException {
+  static boolean tryAction(ActionType action, Direction dir, float degreeOffset, int checksPerSide, Boolean act) throws GameActionException {
 
 
     if( (action==ActionType.MOVE && rc.hasMoved()) || (action==ActionType.FIRE && rc.hasAttacked()) ){
@@ -113,7 +141,7 @@ public strictfp class Bot {
       System.out.println(action);
     }
 
-    if (Actions.dispatchAction(rc, action, dir)) {
+    if (Actions.dispatchAction(rc, action, dir, act)) {
       return true;
     }
 
@@ -123,11 +151,11 @@ public strictfp class Bot {
 
     while(currentCheck<=checksPerSide) {
       // Try the offset of the left side
-      if(Actions.dispatchAction(rc, action, dir.rotateLeftDegrees(degreeOffset*currentCheck))) {
+      if(Actions.dispatchAction(rc, action, dir.rotateLeftDegrees(degreeOffset*currentCheck), act)) {
         return true;
       }
       // Try the offset on the right side
-      if(Actions.dispatchAction(rc, action, dir.rotateRightDegrees(degreeOffset*currentCheck))) {
+      if(Actions.dispatchAction(rc, action, dir.rotateRightDegrees(degreeOffset*currentCheck), act)) {
         return true;
       }
       // No move performed, try slightly further
@@ -177,7 +205,7 @@ public strictfp class Bot {
         netX += b.dir.getDeltaX(1) / Math.pow(b.getLocation().distanceTo(here),2);
         netY += b.dir.getDeltaY(1) / Math.pow(b.getLocation().distanceTo(here),2);
       }
-    }
+}
     if (noDangerousBullet) {
       RobotInfo[] nearbyBots = rc.senseNearbyRobots(-1,them);
       for (RobotInfo r : nearbyBots)

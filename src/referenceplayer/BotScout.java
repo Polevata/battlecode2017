@@ -143,7 +143,7 @@ public strictfp class BotScout extends Bot {
                         Broadcasting.broadcastLocation(rc,currentGardenerIndex,robot.getLocation(), roundNum, robot.ID);
                       else
                       {
-                          currentGardenerIndex = Broadcasting.updateGardener(rc,robot.getLocation(),roundNum,robot.ID);
+                          currentGardenerIndex = Broadcasting.updateTargetRobot(rc,robot.getLocation(),roundNum,robot.ID,false);
                           currentGardenerID = robot.ID;
                       }
                       if (robot.health < 10) {
@@ -164,6 +164,7 @@ public strictfp class BotScout extends Bot {
           }
       }
     }
+
     static void reportDead(int ID, int round, boolean isArchon)
     {
         boolean foundIt = false;

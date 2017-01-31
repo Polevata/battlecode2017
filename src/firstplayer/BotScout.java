@@ -46,7 +46,7 @@ public strictfp class BotScout extends Bot {
   
   public static void tryShake() throws GameActionException {
       try {
-          TreeInfo[] neutralTrees = rc.senseNearbyTrees(myType.strideRadius, Team.NEUTRAL);
+          TreeInfo[] neutralTrees = rc.senseNearbyTrees(myType.bodyRadius+1, Team.NEUTRAL);
           for (TreeInfo tree : neutralTrees) {
               if (rc.canShake(tree.ID) && tree.containedBullets > 0) {
                   System.out.printf("Shaking tree %d", tree.ID);
@@ -146,7 +146,7 @@ public strictfp class BotScout extends Bot {
                         Broadcasting.broadcastLocation(rc,currentGardenerIndex,robot.getLocation(), roundNum, robot.ID);
                       else
                       {
-                          currentGardenerIndex = Broadcasting.updateGardener(rc,robot.getLocation(),roundNum,robot.ID);
+                          currentGardenerIndex = Broadcasting.updateTargetRobot(rc,robot.getLocation(),roundNum,robot.ID, false);
                           currentGardenerID = robot.ID;
                       }
                       if (robot.health < 10) {

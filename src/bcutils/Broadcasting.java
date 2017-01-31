@@ -16,15 +16,24 @@ public strictfp class Broadcasting {
   public static final int ARCHON3 = ARCHON2+SLOTS_USED_PER_LOCATION;
   public static final int GARDENER1 = 12;
   public static final int ENEMY_CLUMP1 = 80;
-  public static final int ARCHON_NUMBER = 280;
+  public static final int DISTRESS1 = 200;
+  public static final int ARCHON_NUMBER = 400;
+
+  //FRIENDLY COUNT
   public static final int GARDENER_NUMBER = ARCHON_NUMBER+1;
   public static final int SOLDIER_NUMBER = ARCHON_NUMBER+2;
   public static final int TANK_NUMBER = ARCHON_NUMBER+3;
   public static final int SCOUT_NUMBER = ARCHON_NUMBER+4;
   public static final int LUMBERJACK_NUMBER = ARCHON_NUMBER+5;
-  public static final int ENEMY_ARCHON_NUMBER = 286;
+
+  //ENEMY COUNT
+  public static final int ENEMY_ARCHON_NUMBER = LUMBERJACK_NUMBER+1;
   public static final int ENEMY_GARDENER_NUMBER = ENEMY_ARCHON_NUMBER+1;
   public static final int ENEMY_CLUMP_NUMBER = ENEMY_ARCHON_NUMBER+2;
+
+  //DISTRESS MODE
+  public static final int DANGER_BUILD_ROUND = ENEMY_CLUMP_NUMBER+1;
+  public static final int DISTRESS_NUMBER = DANGER_BUILD_ROUND+1;
 
   public static void updateArchon(RobotController rc,MapLocation archon, int roundNumber, int archonID) throws GameActionException
   {
@@ -65,45 +74,117 @@ public strictfp class Broadcasting {
     //  System.out.println("Found archon #" + (archonNumber + 1) + " in round " + roundNumber);
     broadcastLocation(rc,ARCHON1 + SLOTS_USED_PER_LOCATION*archonNumber,archon,roundNumber,archonID); //Update the archon that is closest to the updated value
   }
-  public static int updateGardener(RobotController rc,MapLocation gardener, int roundNumber, int gardenerID) throws GameActionException {
-    int gardenerNumber = -1;
+  public static int updateTargetRobot(RobotController rc,MapLocation location, int roundNumber, int robotID, Boolean friendly) throws GameActionException {
+
+    int robotNumber = -1;
     int firstZero = -1;
-    System.out.println("A gardener has been spotted at:" + gardener);
-    for (int i = 0; i < rc.readBroadcast(ENEMY_GARDENER_NUMBER); i++) {
-      int currentGardenerID = rc.readBroadcast(GARDENER1 + i * SLOTS_USED_PER_LOCATION + INDEX_FOR_ID_OR_NUM);
-      if (currentGardenerID == gardenerID)
-        gardenerNumber = i;
-      else if (currentGardenerID == 0 && firstZero == -1)
-        firstZero = i;
+    int oldest = 0;
+    int oldestAge = 0;
+    int ROBOT1 = GARDENER1;
+    int ROBOT_NUMBER = ENEMY_GARDENER_NUMBER;
+
+    if(friendly) {
+      ROBOT1 = DISTRESS1;
+      ROBOT_NUMBER = DISTRESS_NUMBER;
     }
-    if (gardenerNumber == -1)
+
+    int numBots = rc.readBroadcast(ROBOT_NUMBER);
+
+    for (int i = 0; i < numBots; i++) {
+      int age = roundNumber - rc.readBroadcast(ROBOT1 + i * SLOTS_USED_PER_LOCATION + INDEX_FOR_ROUND);
+      if (friendly && age>10) {
+        rc.broadcast(ROBOT1 + i * SLOTS_USED_PER_LOCATION + INDEX_FOR_ID_OR_NUM, 0);
+      }
+      int currentRobotID = rc.readBroadcast(ROBOT1 + i * SLOTS_USED_PER_LOCATION + INDEX_FOR_ID_OR_NUM);
+      if (currentRobotID == robotID)
+        robotNumber = i;
+      else if (currentRobotID == 0 && firstZero == -1)
+        firstZero = i;
+      else if (age > oldestAge) {
+          oldest = i;
+          oldestAge = age;
+      }
+    }
+
+    System.out.println("REPORT DISTRESS");
+    System.out.println(robotNumber);
+    System.out.println(numBots);
+
+    if (robotNumber == -1)
     {
       System.out.println("This gardener is new or was presumed dead");
-      int numGards = rc.readBroadcast(ENEMY_GARDENER_NUMBER);
-      if (numGards != 20)
-        rc.broadcast(ENEMY_GARDENER_NUMBER,numGards+1);
+      if (numBots != 20)
+        rc.broadcast(ROBOT_NUMBER,numBots+1);
       if (firstZero != -1)
       {
         System.out.println("This gardener will fill a slot that was unoccupied");
-        gardenerNumber = firstZero;
+        robotNumber = firstZero;
       }
       else
       {
-        if (numGards < 20)
+        if (numBots < 20)
         {
-          gardenerNumber = numGards;
+          robotNumber = numBots;
           System.out.println("This gardener is new and will be added at the end");
         }
         else
         {
-          gardenerNumber = 20;
+          robotNumber = oldest;
           System.out.println("Here comes the 20th gardener!");
         }
       }
     }
-    broadcastLocation(rc,GARDENER1 + SLOTS_USED_PER_LOCATION*gardenerNumber,gardener,roundNumber,gardenerID);
-    return gardenerNumber;
+    broadcastLocation(rc,ROBOT1 + SLOTS_USED_PER_LOCATION*robotNumber,location,roundNumber,robotID);
+    return robotNumber;
   }
+
+  public static void removeTargetRobot(RobotController rc, int robotID, Boolean friendly) throws GameActionException{
+    System.out.println("REMOVE TARGET");
+    int robotNumber = -1;
+    int firstZero = -1;
+    int ROBOT1 = GARDENER1;
+    int ROBOT_NUMBER = ENEMY_GARDENER_NUMBER;
+    if(friendly) {
+      ROBOT1 = DISTRESS1;
+      ROBOT_NUMBER = DISTRESS_NUMBER;
+    }
+    for (int i = 0; i < rc.readBroadcast(ROBOT_NUMBER); i++) {
+      int currentRobotID = rc.readBroadcast(ROBOT1 + i * SLOTS_USED_PER_LOCATION + INDEX_FOR_ID_OR_NUM);
+      if (currentRobotID == robotID) {
+        rc.broadcast(ROBOT1 + i * SLOTS_USED_PER_LOCATION + INDEX_FOR_ID_OR_NUM, 0);
+        rc.broadcast(ROBOT_NUMBER, rc.readBroadcast(ROBOT_NUMBER)-1);
+      }
+    }
+  }
+
+  public static MapLocation closestDistress(RobotController rc) throws  GameActionException{
+    MapLocation loc = rc.getLocation();
+    MapLocation distress;
+    MapLocation goal = new MapLocation(-1, -1);
+    float distressX;
+    float distressY;
+    float minDistance = Float.MAX_VALUE;
+    float distance;
+    for (int i = 0; i < rc.readBroadcast(DISTRESS_NUMBER); i++){
+      if(rc.readBroadcast(DISTRESS1 + i * SLOTS_USED_PER_LOCATION + INDEX_FOR_ID_OR_NUM) != 0) {
+        distressX = rc.readBroadcast(DISTRESS1 + i * SLOTS_USED_PER_LOCATION + INDEX_FOR_X);
+        distressY = rc.readBroadcast(DISTRESS1 + i * SLOTS_USED_PER_LOCATION + INDEX_FOR_Y);
+        distress = new MapLocation(distressX, distressY);
+        distance = loc.distanceTo(distress);
+        if (distance < minDistance) {
+          minDistance = distance;
+          goal = distress;
+        }
+      }
+    }
+    System.out.println("READ DISTRESS");
+    if(goal.x!=-1) {
+      System.out.println(goal.x);
+      System.out.println(goal.y);
+    }
+    return goal;
+  }
+
 /*
   Changes the Archon number to the round number???
   public static void reportEnemy(RobotController rc, MapLocation enemy, int round) throws GameActionException
