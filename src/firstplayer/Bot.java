@@ -21,7 +21,8 @@ public strictfp class Bot {
 
   // static variables that may change each round; modified in update()
   public static MapLocation here;
-  public static float health;
+  public static float myHealth;
+  public static float previousHealth;
   public static int roundNum;
   public static int roundNumBirth;
   public static RobotInfo[] nearbyFriends;
@@ -37,7 +38,8 @@ public strictfp class Bot {
     myID = rc.getID();
     us = rc.getTeam();
     them = us.opponent();
-    health = rc.getHealth();
+    myHealth = rc.getHealth();
+    previousHealth = myHealth;
     reportAlive = true;
     random = new Random(myID);
     nearbyFriends = rc.senseNearbyRobots(-1, us);
@@ -65,7 +67,8 @@ public strictfp class Bot {
   static void update() throws GameActionException {
     here = rc.getLocation();
     roundNum = rc.getRoundNum();
-    health = rc.getHealth();
+    previousHealth = myHealth;
+    myHealth = rc.getHealth();
     nearbyFriends = rc.senseNearbyRobots(-1, us);
     nearbyEnemies = rc.senseNearbyRobots(-1, them);
     nearbyTrees = rc.senseNearbyTrees();
