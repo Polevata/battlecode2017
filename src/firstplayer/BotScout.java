@@ -3,9 +3,6 @@ package firstplayer;
 import battlecode.common.*;
 import bcutils.Actions.*;
 import bcutils.Broadcasting;
-import bcutils.Utils;
-
-import java.util.ArrayList;
 
 public strictfp class BotScout extends Bot {
   public static final int deathTime = 8; //rounds
@@ -43,7 +40,7 @@ public strictfp class BotScout extends Bot {
     tryShake();
     harass();
     sendReceiveIntel();
-    reportTheDead();
+    bringOutYourDead();
   }
   
   public static void tryShake() throws GameActionException {
@@ -130,7 +127,7 @@ public strictfp class BotScout extends Bot {
         // If there are some...
         if (nearbyEnemies.length > 0) {
             // And we have enough bullets, and haven't attacked yet this turn...
-            if (rc.canFireSingleShot() )//&& random.nextFloat()*(rc.getType().sensorRadius-rc.getLocation().distanceTo(nearbyEnemies[0].getLocation())) > (rc.getType().bodyRadius*2))
+            if (rc.canFireSingleShot() && random.nextFloat()*(rc.getType().sensorRadius-rc.getLocation().distanceTo(nearbyEnemies[0].getLocation())) > (nearbyEnemies[0].getType().bodyRadius*2))
             {
                 // ...Then fire a bullet in the direction of the enemy.
                 rc.fireSingleShot(rc.getLocation().directionTo(nearbyEnemies[0].location));
@@ -204,7 +201,7 @@ public strictfp class BotScout extends Bot {
         }
 
     }
-    static void reportTheDead() throws GameActionException
+    static void bringOutYourDead() throws GameActionException
     {
         for (int i = 0;i<25;i++)
         {

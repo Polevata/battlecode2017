@@ -89,7 +89,7 @@ public strictfp class Bot {
       rc.donate(bulletsLeft);
     System.out.println("Number of friendly gardeners" + rc.readBroadcast(Broadcasting.GARDENER_NUMBER));
     System.out.println("Number of friendly archons" + rc.readBroadcast(Broadcasting.ARCHON_NUMBER));
-    if (rc.readBroadcast(Broadcasting.GARDENER_NUMBER) + rc.readBroadcast(Broadcasting.ARCHON_NUMBER) == 0)
+    if (rc.readBroadcast(Broadcasting.GARDENER_NUMBER) + rc.readBroadcast(Broadcasting.ARCHON_NUMBER) == 0 && roundNum > 10)
       rc.donate(rc.getTeamBullets());
   }
   public static Direction randomDirection() {
