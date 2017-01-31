@@ -17,7 +17,7 @@ public strictfp class Broadcasting {
   public static final int GARDENER1 = 12;
   public static final int ENEMY_CLUMP1 = 80;
   public static final int DISTRESS1 = 200;
-  public static final int ARCHON_NUMBER = 400;
+  public static final int ARCHON_NUMBER = 420;
 
   //FRIENDLY COUNT
   public static final int GARDENER_NUMBER = ARCHON_NUMBER+1;
