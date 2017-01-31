@@ -15,7 +15,7 @@ public strictfp class Bot {
   public static Team us;
   public static Team them;
   public static Random random;
-  public static boolean reportAlive;
+  public static boolean reportAlive = true;
   public static boolean plant = true;
 
   // static variables that may change each round; modified in update()
@@ -68,6 +68,11 @@ public strictfp class Bot {
     nearbyFriends = rc.senseNearbyRobots(-1, us);
     nearbyEnemies = rc.senseNearbyRobots(-1, them);
     nearbyTrees = rc.senseNearbyTrees();
+    if (rc.getHealth() < 10 && reportAlive)
+    {
+      reportAlive = false;
+      Broadcasting.decrementRobotType(rc,myType);
+    }
 
     wasInDanger = inDanger;
     if (nearbyEnemies.length > 0) {
@@ -82,6 +87,8 @@ public strictfp class Bot {
     float bulletsLeft = GameConstants.VICTORY_POINTS_TO_WIN - rc.getTeamVictoryPoints()*(GameConstants.VP_BASE_COST + roundNum*GameConstants.VP_INCREASE_PER_ROUND);
     if (rc.getTeamBullets() >= bulletsLeft && !RobotPlayer.DEBUGGING)
       rc.donate(bulletsLeft);
+    System.out.println("Number of friendly gardeners" + rc.readBroadcast(Broadcasting.GARDENER_NUMBER));
+    System.out.println("Number of friendly archons" + rc.readBroadcast(Broadcasting.ARCHON_NUMBER));
     if (rc.readBroadcast(Broadcasting.GARDENER_NUMBER) + rc.readBroadcast(Broadcasting.ARCHON_NUMBER) == 0)
       rc.donate(rc.getTeamBullets());
   }
