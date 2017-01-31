@@ -5,6 +5,7 @@ import bcutils.Actions.*;
 import bcutils.Actions;
 import bcutils.Broadcasting;
 
+import java.awt.*;
 import java.util.ArrayList;
 import java.util.Random;
 
@@ -218,8 +219,8 @@ public strictfp class Bot {
       RobotInfo[] nearbyBots = rc.senseNearbyRobots(-1,them);
       for (RobotInfo r : nearbyBots)
       {
-        if (r.getType() == RobotType.LUMBERJACK && r.getLocation().distanceTo(here) < RobotType.LUMBERJACK.bodyRadius + GameConstants.LUMBERJACK_STRIKE_RADIUS*5)
-          return tryAction(ActionType.MOVE, r.getLocation());
+        if (r.getType() == RobotType.LUMBERJACK && r.getLocation().distanceTo(here) < RobotType.LUMBERJACK.bodyRadius + GameConstants.LUMBERJACK_STRIKE_RADIUS*2)
+          return tryAction(ActionType.MOVE, r.getLocation().directionTo(here));
       }
       return false;
     }
